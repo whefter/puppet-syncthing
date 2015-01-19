@@ -1,0 +1,463 @@
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides:          syncthing
+# Required-Start:    $network $remote_fs $syslog
+# Required-Stop:     $network $remote_fs $syslog
+# Should-Start:      network-manager
+# Should-Stop:       network-manager
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: syncthing Service
+# Description: This script will start syncthing service instances as specified
+#              in /etc/default/syncthing and /etc/syncthing/*.conf
+### END INIT INFO
+
+# Original author of btsync init.d script
+# Author: Leo Moll <leo.moll@yeasoft.com>
+
+# Slightly modified for syncthing by
+# William Hefter <william@whefter.de>
+
+# PATH should only include /usr/* if it runs after the mountnfs.sh script
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+DESC="Open source P2P file synchronisation daemon(s)"
+NAME=syncthing
+DAEMON=/usr/bin/syncthing
+DAEMON_BINARY=syncthing
+DAEMON_ARGS=""
+SCRIPTNAME=/etc/init.d/$NAME
+CONFIG_DIR=/etc/$NAME
+CONFIG_EXT=conf
+AUTOSTART="all"
+TIMEOUT=5
+
+# Exit if the package is not installed
+[ -x $DAEMON ] || exit 0
+
+# Read configuration variable file if it is present
+[ -r /etc/default/$NAME ] && . /etc/default/$NAME
+
+# Load the VERBOSE setting and other rcS variables
+. /lib/init/vars.sh
+
+# Define LSB log_* functions.
+# Depend on lsb-base (>= 3.0-6) to ensure that this file is present.
+. /lib/lsb/init-functions
+
+test $DEBIAN_SCRIPT_DEBUG && set -v -x
+
+test -d $CONFIG_DIR || exit 0
+
+set +e
+
+log_message () {
+	if which logger > /dev/null; then
+		if [ -z $NAME ]; then
+			TOPIC=syncthing
+		else
+			TOPIC=${NAME}.${BASENAME}
+		fi
+		LEVEL=$1
+		shift
+		logger -p user.$LEVEL -t $TOPIC "$@"
+	fi
+}
+
+log_info () {
+	log_message "info" "$@"
+}
+
+log_warning () {
+	log_message "warn" "$@"
+}
+
+log_error () {
+	log_message "err" "$@"
+}
+
+log_info_msg () {
+	echo "$@"
+	log_message "info" "$@"
+}
+
+log_error_msg () {
+	log_failure_msg "$@"
+	log_message "err" "$@"
+}
+
+config_debug () {
+	if [ $DAEMON_INIT_DEBUG ]; then
+		log_info_msg "== COMMAND: ${1} ==========================="
+		log_info_msg "File Name: '$CONFFILE'"
+		log_info_msg "Name Part: '$BASENAME'"
+		log_info_msg "Credential Part: '$CREDENTIALS'"
+		log_info_msg "Run As User: '$CRED_UID'"
+		log_info_msg "Run As Group: '$CRED_GID'"
+		log_info_msg "Run with umask: '$UMASK'"
+		log_info_msg "Home directory: '$HOME_PATH'"
+		log_info_msg "PID File: '$PID_FILE'"
+		log_info_msg "Debug flags: '$DMASK'"
+		log_info_msg "Nice level: '$NICE_LEVEL'"
+	    if [ "${DAEMON_ADDR}" != "0.0.0.0" ]; then
+			log_info_msg "Bind address: '$DAEMON_ADDR'"
+		elif [ -n "${DAEMON_BIND}" ]; then
+			log_info_msg "Bind address: '$DAEMON_BIND'"
+		fi
+	fi
+}
+
+credentials_from_conffile () {
+	# $1 : config file
+	BASENAME=${1%%.*${CONFIG_EXT}}
+	
+	. "${CONFIG_DIR}/$1"
+	
+	CRED_UID=$DAEMON_UID
+	CRED_GID=$DAEMON_GID
+	
+	if [ -n "$CRED_UID" -a -n "$CRED_GID" ]; then
+		CREDENTIALS="${CRED_UID}:${CRED_GID}"
+	elif [ -n "$CRED_UID" ]; then
+		CREDENTIALS="${CRED_UID}"
+	elif [ -n "$CRED_GID" ]; then
+		CREDENTIALS="root:${CRED_GID}"
+	else
+		CREDENTIALS=""
+	fi
+	
+	CRED_UID=${CRED_UID:-root}
+	CRED_GID=${CRED_GID:-root}
+}
+
+config_from_conffile () {
+	# $1 : config file
+	credentials_from_conffile "$1"
+	
+	. "${CONFIG_DIR}/$1"
+	
+	UMASK=$DAEMON_UMASK
+	UMASK=$(expr match "${UMASK}" '\([0-7]\{1,4\}\)')
+	UMASK=${UMASK:-$(umask)}
+	
+	DMASK=$DAEMON_DEBUG
+	DMASK=$(expr match "${DMASK}" '\([0-9,A-F,a-f][0-9,A-F,a-f][0-9,A-F,a-f][0-9,A-F,a-f]\)' | tr "[a-f]" "[A-F]")
+	
+	NICE_LEVEL=$DAEMON_NICE
+	NICE_LEVEL=$(expr match "${NICE_LEVEL}" '\(-\{0,1\}+\{0,1\}[0-9]\{1,2\}\)')
+	NICE_LEVEL=${NICE_LEVEL:-0}
+	
+	HOME_PATH=$(expr match "${HOME_PATH}" '^[[:space:]]*"\(.*\)".*')
+	
+	PID_FILE=${HOME_PATH}/sync.pid
+}
+
+config_from_name () {
+	# $1 : name
+	unset CONFFILE
+	for CONFFILE in `cd $CONFIG_DIR; ls $1.*${CONFIG_EXT} 2> /dev/null`; do
+		config_from_conffile ${CONFFILE}
+		# take the first one
+		break
+	done
+}
+
+config_from_pidfile () {
+	# $1 : pid file
+	BASENAME=$(basename $1 | cut -c8-)
+	BASENAME=${BASENAME%%.pid}
+	config_from_name "${BASENAME}"
+}
+
+test_valid_config () {
+	# test for undetected base name (this should never happen)
+	if [ -z ${BASENAME} ]; then
+		log_error_msg "No instance name detected. Interrupting sequence."
+		exit 1
+	fi
+	# test for undetected home path in config file
+	if [ -z ${HOME_PATH} ]; then
+		log_error_msg "Cannot determine home path for ${BASENAME}. Interrupting sequence."
+		exit 2
+	fi
+	# test for absolute home path in config file AND home path not /
+	case $(expr match "${HOME_PATH}" '/.*') in
+	0)	log_error_msg "home path for ${BASENAME} must be absolute. Interrupting sequence."
+		exit 1
+		;;
+	1)	log_error_msg "home path for ${BASENAME} cannot be the root of filesystem. Interrupting sequence."
+		exit 1
+		;;
+	*)	;;
+	esac
+}
+
+test_running () {
+	# Parameters:
+	# $1: configuration base name
+	# Return:
+	# return value 0 if running
+	# return value 1 if no pid file
+	# return value 2 if pid in pidfile not running
+	if [ -f /var/run/${NAME}.${1}.pid ]; then
+		TESTPID=$(cat /var/run/${NAME}.${1}.pid)
+		if [ $(( $TESTPID )) -gt 10 ]; then
+			if [ -f /proc/${TESTPID}/status ]; then
+				return 0
+			else
+				return 2
+			fi
+		fi
+	fi
+	return 1
+}
+
+adjust_arm_alignment () {
+	if [ -r /proc/cpu/alignment ]; then
+		if ! $DAEMON --help > /dev/null 2> /dev/null; then
+			# something is wrong
+			if $DAEMON --help | grep -i "Alignment error" > /dev/null 2> /dev/null; then
+				log_info "Changing alignment setting for executing syncthing"
+				echo 2 > /proc/cpu/alignment
+			fi
+		fi
+	fi
+}
+
+adjust_home_path () {
+	# make sure the specified home path exists....
+	mkdir -p "${HOME_PATH}"
+	# and adapt the ownership of the home path
+	if [ -n "${CREDENTIALS}" ]; then
+		chown -R ${CREDENTIALS} "${HOME_PATH}"
+	fi
+	# and adapt the home path permissions (Closes #122)
+	chmod 700 "${HOME_PATH}"
+	adjust_home_path_file "${HOME_PATH}/cert.pem"
+	adjust_home_path_file "${HOME_PATH}/config.xml"
+	adjust_home_path_file "${HOME_PATH}/key.pem"
+}
+
+adjust_home_path_file () {
+	if [ -f $1 ]; then
+		chmod 600 $1
+	fi
+}
+
+adjust_debug_flags () {
+	if [ -z ${HOME_PATH} ]; then
+		return
+	fi
+	if [ -n "${DMASK}" ]; then
+		if [ "${DMASK}" = "0000" ]; then
+			# remove mask specification file
+			rm -f "${CREDENTIALS}" "${HOME_PATH}/debug.txt"
+		else
+			if [ ! -d "${HOME_PATH}" ]; then
+				# initial launch: home path does not exist
+				mkdir -p "${HOME_PATH}"
+				# make sure the owner is correct
+				if [ -n "${CREDENTIALS}" ]; then
+					chown "${CREDENTIALS}" "${HOME_PATH}"
+				fi
+			fi
+			echo "${DMASK}" > "${HOME_PATH}/debug.txt"
+			if [ -n "${CREDENTIALS}" ]; then
+				chown "${CREDENTIALS}" "${HOME_PATH}/debug.txt"
+			fi
+		fi
+	fi
+	# ignore mask specification file if DAEMON_DEBUG is not specified
+}
+
+start_syncthing () {
+	config_debug "START"
+
+	STATUS=0
+	pidofproc -p /var/run/$NAME.$BASENAME.pid $DAEMON_BINARY >/dev/null || STATUS=$?
+	if [ "$STATUS" = 0 ]; then
+		log_daemon_msg "syncthing instance '${BASENAME}' already running."
+		log_end_msg 0
+		return 0
+	fi
+
+	log_daemon_msg "${1:-Starting syncthing instance '${BASENAME}'}"
+	adjust_arm_alignment
+	adjust_home_path
+	adjust_debug_flags
+	
+	STATUS=0
+	start-stop-daemon --start --quiet --oknodo \
+		--nicelevel $NICE_LEVEL \
+		--pidfile /var/run/$NAME.$BASENAME.pid \
+		--make-pidfile ${CREDENTIALS:+--chuid ${CREDENTIALS}} \
+		--background ${UMASK:+--umask ${UMASK}} \
+		--exec $DAEMON \
+		-- -logfile=${HOME_PATH}/syncthing.log -home=$HOME_PATH $DAEMON_ARGS  || STATUS=1
+
+	if [ "$STATUS" != 0 ]; then
+		# start-stop-daemon failed. Let's exit immediately
+		log_error_msg "Failed to start $NAME instance $BASENAME - please check the configuration file $CONFIG_DIR/$CONFFILE"
+		return 1
+	fi
+	# since btsync does not return an acceptable error
+	# code, we must check that it is really running
+	WAITCNT=0
+	sleep 1
+	until test_running $BASENAME; do
+		# and wait for the process to come up
+		if [ $WAITCNT -ge $TIMEOUT ]; then
+			log_error_msg "Failed to start $NAME instance $BASENAME - please check the configuration file $CONFIG_DIR/$CONFFILE"
+			shim_end
+			STATUS=1
+			return 1
+		fi
+		sleep 1
+		WAITCNT=$(($WAITCNT + 1))
+	done
+	adjust_home_path
+	shim_end
+	log_info "$NAME instance $BASENAME started successfully"
+	log_end_msg $STATUS
+	STATUS=0
+}
+
+stop_syncthing () {
+	config_debug "STOP"
+	log_daemon_msg "${1:-Stopping syncthing instance '${BASENAME}'}"
+	adjust_arm_alignment
+	PIDFILE=/var/run/$NAME.$BASENAME.pid
+	STATUS=0
+	start-stop-daemon --stop --quiet \
+		--retry=TERM/30/KILL/5 \
+		--exec $DAEMON --pidfile ${PIDFILE}  || STATUS=1
+	if [ -f ${PIDFILE} ]; then
+		TESTPID=$(cat ${PIDFILE})
+		if [ $(( $TESTPID )) -gt 10 ]; then
+			if [ ! -f /proc/${TESTPID}/status ]; then
+				# remove pid file only if process has really terminated
+				rm ${PIDFILE}
+			fi
+		fi
+	fi
+	adjust_home_path
+	if [ $STATUS -gt 0 ]; then
+		log_error_msg "Failed to stop $NAME instance $BASENAME"
+	else
+		log_info "$NAME instance $BASENAME stopped successfully"
+		log_end_msg $STATUS
+	fi
+}
+
+
+case "$1" in
+start)
+	# create config files from components
+	for COMPO in $(find "${CONFIG_DIR}" -maxdepth 1 -type d -name '*.'${CONFIG_EXT}'.d'); do
+		conffile_from_confdir "${COMPO}"
+	done
+	# autostart syncthing instances
+	if [ -z "$2" ]; then
+		# check if automatic startup is disabled by AUTOSTART=none
+		if [ "x$AUTOSTART" = "xnone" -o -z "$AUTOSTART" ]; then
+			log_warning_msg "Autostart disabled, no syncthing instance will be started."
+			exit 0
+		fi
+		if [ -z "$AUTOSTART" -o "x$AUTOSTART" = "xall" ]; then
+			ANYSTARTED=0
+			# all syncthing instances shall be started automatically
+			for CONFFILE in `cd $CONFIG_DIR; ls *.${CONFIG_EXT} 2> /dev/null`; do
+				config_from_conffile "${CONFFILE}"
+				test_valid_config
+				start_syncthing "Autostarting syncthing instance '$BASENAME'"
+				ANYSTARTED=1
+			done
+			if [ $ANYSTARTED -eq 0 ]; then
+				log_warning_msg "No config files found in $CONFIG_DIR - Nothing to start"
+			fi
+		else
+			ANYSTARTED=0
+			# start only specified syncthing instances
+			for BASENAME in $AUTOSTART ; do
+				config_from_name "${BASENAME}"
+				if [ -f $CONFIG_DIR/$CONFFILE ]; then
+					test_valid_config
+					start_syncthing "Autostarting syncthing instance '$BASENAME'"
+					ANYSTARTED=1
+				else
+					log_error_msg "Autostarting syncthing instance '$BASENAME': missing $CONFIG_DIR/${BASENAME}.conf file !"
+					STATUS=1
+				fi
+			done
+			if [ $ANYSTARTED -eq 0 ]; then
+				log_warning_msg "Config file ${BASENAME}.conf found in $CONFIG_DIR - Nothing to start"
+			fi
+		fi
+	else
+		# start syncthing instances from command line
+		while shift ; do
+			[ -z "$1" ] && break
+			config_from_name "$1"
+			if [ -z "$CONFFILE" ]; then
+				log_error_msg "Requested syncthing instance '$1' does not exist"
+				STATUS=1
+			elif [ -f $CONFIG_DIR/$CONFFILE ]; then
+				test_valid_config
+				start_syncthing
+			else
+				log_error_msg "Starting syncthing instance '$BASENAME': missing $CONFIG_DIR/$CONFFILE file !"
+				STATUS=1
+			fi
+		done
+	fi
+	# exit ${STATUS:-0}
+	;;
+stop)
+	if [ -z "$2" ]; then
+		PIDFILE=
+		for PIDFILE in `ls /var/run/$NAME.*.pid 2> /dev/null`; do
+			config_from_pidfile $PIDFILE
+			stop_syncthing
+		done
+		if test -z "$PIDFILE" ; then
+			log_warning_msg "No syncthing instance is running."
+		fi
+		# the final hammer
+		pkill ${DAEMON_BINARY}
+	else
+		while shift ; do
+			[ -z "$1" ] && break
+			if [ -f /var/run/$NAME.$1.pid ]; then
+				PIDFILE=`ls /var/run/$NAME.$1.pid 2> /dev/null`
+				config_from_pidfile $PIDFILE
+				stop_syncthing
+			else
+				log_error_msg "Stopping syncthing instance '$1': No such syncthing instance is running."
+			fi
+		done
+	fi
+	# exit ${STATUS:-0}
+	;;
+status)
+	PIDFILE=
+	for PIDFILE in `ls /var/run/$NAME.*.pid 2> /dev/null`; do
+		config_from_pidfile $PIDFILE
+		config_debug "STATUS"
+		status_of_proc -p $PIDFILE $(basename $DAEMON) "SYNCTHING '${BASENAME}'"
+	done
+	;;
+restart|force-reload)
+	shift
+	$0 stop ${@}
+	sleep 1
+	$0 start ${@}
+	;;
+*)
+	echo "Usage: $0 {start|stop|restart|force-reload|status}" >&2
+	exit 1
+	;;
+esac
+
+exit 0
+
+# vim:set ai sts=2 sw=2 tw=0:

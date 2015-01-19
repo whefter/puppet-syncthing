@@ -1,0 +1,15 @@
+{
+  "author": "William Hefter",
+  "dependencies": [
+    {"name":"puppetlabs/stdlib","version_requirement":">= 4.5.0"}
+  ],
+  "license": "GPL2",
+  "name": "whefter-syncthing",
+  "operatingsystem_support": [],
+  "project_page": "",
+  "requirements": [],
+  "source": "https://github.com/whefter/puppet-syncthing.git",
+  "summary": "Syncthing module for puppet",
+  "tags": [],
+  "version": "0.1.0"
+}

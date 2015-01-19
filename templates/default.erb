@@ -1,0 +1,22 @@
+# This is the configuration file for /etc/init.d/syncthing
+#
+# Start only these syncthing instances automatically via
+# init script.
+# Allowed values are "all", "none" or a space separated list of
+# names of the instances. If empty, "all" is assumed.
+#
+# The instance name refers to the syncthing configuration file name.
+# i.e. "general" would be /etc/syncthing/general.conf
+#
+#AUTOSTART="all"
+#AUTOSTART="none"
+#AUTOSTART="general special"
+#
+# Optional arguments to syncthing's command line. Be careful!
+# You should only add things here if you know EXACTLY what
+# you are doing!
+DAEMON_ARGS=""
+#
+# Enable this to see more output during the init script
+# execution
+#DAEMON_INIT_DEBUG=1
