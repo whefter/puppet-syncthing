@@ -2,18 +2,20 @@
 #
 # DAEMON_UID:      A uid for supplying the user under which
 #                  the syncthing daemon should run
-DAEMON_UID=jdoe
+DAEMON_UID=<%= @daemon_uid %>
 #
 # DAEMON_GID:      A gid for supplying the group under which
 #                  the syncthing daemon should run. If omitted
 #                  the daemon will run under the primary group
 #                  of the user
-DAEMON_GID=jdoe
+DAEMON_GID=<%= @daemon_gid %>
 #
 # DAEMON_UMASK:    The umask (up to 4 octal digits) for the
 #                  syncthing daemon. If omitted the default umask
 #                  is used.
-DAEMON_UMASK=0002
+<%- if @daemon_umask -%>
+DAEMON_UMASK=<%= @daemon_umask %>
+<%- end -%>
 #
 # DAEMON_DEBUG:    The debug mask (4 hex digits) for the syncthing
 #                  daemon. If omitted the init script will not
@@ -21,12 +23,17 @@ DAEMON_UMASK=0002
 #                  If set to 0000, a potential settings file
 #                  will be deleted. Full detail is set by
 #                  specifying FFFF
-#DAEMON_DEBUG=FFFF
+<%- if @daemon_debug -%>
+DAEMON_DEBUG=<%= @daemon_debug %>
+<%- end -%>
 #
 # DAEMON_NICE:     The niceness level of the syncthing daemon, which
 #                  affects process scheduling. Nicenesses range from
 #                  -20 (most favorable scheduling) to 19 (least
 #                  favorable).
-#DAEMON_NICE=0
+<%- if @daemon_nice -%>
+DAEMON_NICE=<%= @daemon_nice %>
+<%- end -%>
 #
 # HOME_PATH:       Path to the configuration directory for this instance
+HOME_PATH=<%= @home_path %>

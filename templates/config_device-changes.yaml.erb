@@ -1,0 +1,13 @@
+---
+ - 'set device[#attribute/id="<%= @id %>"]/#attribute/id <%= @id %>'
+ - 'set device[#attribute/id="<%= @id %>"]/#attribute/name <%= @device_name %>'
+ - 'set device[#attribute/id="<%= @id %>"]/#attribute/compression <%= @compression %>'
+ - 'set device[#attribute/id="<%= @id %>"]/#attribute/introducer <%= @introducer %>'
+ - 'set device[#attribute/id="<%= @id %>"]/address/#text <%= @address %>'
+<%- @options.each do |key, value|
+        if value -%>
+ - 'set device[#attribute/id="<%= @id %>"]/<%= key %>/#text <%= value %>'
+    <%- else -%>
+ - 'rm device[#attribute/id="<%= @id %>"]/<%= key %>'
+<%-     end
+    end -%>

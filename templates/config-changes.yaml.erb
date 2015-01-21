@@ -1,0 +1,27 @@
+---
+ - 'set gui/#attribute/enabled <%= @gui %>'
+ - 'set gui/#attribute/tls <%= @gui_tls %>'
+ - 'set gui/address/#text <%= @gui_address %>:<%= @gui_port %>'
+<%- if @gui_apikey -%>
+ - 'set gui/apikey/#text <%= @gui_apikey %>'
+<%- end -%>
+<%- if @gui_user -%>
+ - 'set gui/user/#text <%= @gui_user %>'
+<%- end -%>
+<%- if @gui_password -%>
+ - 'set gui/password/#text <%= @gui_password %>'
+<%- end -%>
+<%- @gui_options.each do |key, value|
+        if value -%>
+ - 'set gui/<%= key %>/#text <%= value %>'
+    <%- else -%>
+ - 'rm gui/<%= key %>' 
+<%-     end
+    end -%>
+<%- @options.each do |key, value|
+        if value -%>
+ - 'set options/<%= key %>/#text <%= value %>'
+    <%- else -%>
+ - 'rm options/<%= key %>'
+<%-     end
+    end -%>
