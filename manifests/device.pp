@@ -39,6 +39,4 @@ define syncthing::device
       Class['syncthing'],
     ],
   }
-  
-  create_resources( ::syncthing::folder, $folders )
 }

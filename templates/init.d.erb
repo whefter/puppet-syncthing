@@ -10,24 +10,24 @@
 # Default-Stop:      0 1 6
 # Short-Description: syncthing Service
 # Description: This script will start syncthing service instances as specified
-#              in /etc/default/syncthing and /etc/syncthing/*.conf
+#              in /etc/default/syncthing and <%= scope.lookupvar('syncthing::instancespath') %>/*.conf
 ### END INIT INFO
 
 # Original author of btsync init.d script
 # Author: Leo Moll <leo.moll@yeasoft.com>
 
-# Slightly modified for syncthing by
+# Modified for syncthing by
 # William Hefter <william@whefter.de>
 
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="Open source P2P file synchronisation daemon(s)"
-NAME=syncthing
+NAME=<%= scope.lookupvar('syncthing::bin') %>
 DAEMON=<%= scope.lookupvar('syncthing::binpath') %>/<%= scope.lookupvar('syncthing::bin') %>
 DAEMON_BINARY=<%= scope.lookupvar('syncthing::bin') %>
 DAEMON_ARGS=""
-SCRIPTNAME=/etc/init.d/$NAME
-CONFIG_DIR=/etc/$NAME
+SCRIPTNAME=/etc/init.d/<%= scope.lookupvar('syncthing::bin') %>
+CONFIG_DIR=<%= scope.lookupvar('syncthing::instancespath') %>
 CONFIG_EXT=conf
 AUTOSTART="all"
 TIMEOUT=5
@@ -147,8 +147,6 @@ config_from_conffile () {
 	NICE_LEVEL=$(expr match "${NICE_LEVEL}" '\(-\{0,1\}+\{0,1\}[0-9]\{1,2\}\)')
 	NICE_LEVEL=${NICE_LEVEL:-0}
 	
-	#HOME_PATH=$(expr match "${HOME_PATH}" '^[[:space:]]*"\(.*\)".*')
-	
 	PID_FILE=${HOME_PATH}/sync.pid
 }
 
@@ -167,6 +165,22 @@ config_from_pidfile () {
 	BASENAME=$(basename $1 | cut -c8-)
 	BASENAME=${BASENAME%%.pid}
 	config_from_name "${BASENAME}"
+}
+
+pid_from_name () {
+	# $1 : name
+	PID=
+	config_from_name "${1}"
+	for TESTPID in `pgrep -fu ${DAEMON_UID} "${DAEMON_BINARY} .*-home(=|\s+)${HOME_PATH}$"`; do
+		# Find parent process
+		PARENTPID=$(ps -p $(ps -p $TESTPID -o ppid=) -o comm=)
+		if [ -n "${PARENTPID}" ]; then
+			if [ "${PARENTPID}" != "${DAEMON_BINARY}" ]; then
+				PID=$TESTPID
+				break
+			fi
+		fi 
+	done 
 }
 
 test_valid_config () {
@@ -199,16 +213,18 @@ test_running () {
 	# return value 0 if running
 	# return value 1 if no pid file
 	# return value 2 if pid in pidfile not running
-	if [ -f /var/run/${NAME}.${1}.pid ]; then
-		TESTPID=$(cat /var/run/${NAME}.${1}.pid)
-		if [ $(( $TESTPID )) -gt 10 ]; then
-			if [ -f /proc/${TESTPID}/status ]; then
-				return 0
-			else
-				return 2
-			fi
+	
+	pid_from_name "${1}"
+	TESTPID=$PID
+	
+	if [ $(( $TESTPID )) -gt 10 ]; then
+		if [ -f /proc/${TESTPID}/status ]; then
+			return 0
+		else
+			return 2
 		fi
 	fi
+
 	return 1
 }
 
@@ -273,9 +289,8 @@ adjust_debug_flags () {
 start_syncthing () {
 	config_debug "START"
 
-	STATUS=0
-	pidofproc -p /var/run/$NAME.$BASENAME.pid $DAEMON_BINARY >/dev/null || STATUS=$?
-	if [ "$STATUS" = 0 ]; then
+	pid_from_name "${BASENAME}"
+	if [ "$PID" > 0 ]; then
 		log_daemon_msg "syncthing instance '${BASENAME}' already running."
 		log_end_msg 0
 		return 0
@@ -294,7 +309,7 @@ start_syncthing () {
 		--background ${UMASK:+--umask ${UMASK}} \
 		--exec $DAEMON \
 		-- -home="${HOME_PATH}" \
-		   #-logfile="${HOME_PATH}/syncthing.log" \
+#		   -logfile="${HOME_PATH}/syncthing.log" \
 		   $DAEMON_ARGS  || STATUS=1
 
 	if [ "$STATUS" != 0 ]; then
@@ -310,7 +325,6 @@ start_syncthing () {
 		# and wait for the process to come up
 		if [ $WAITCNT -ge $TIMEOUT ]; then
 			log_error_msg "Failed to start $NAME instance $BASENAME - please check the configuration file $CONFIG_DIR/$CONFFILE"
-			#shim_end
 			STATUS=1
 			return 1
 		fi
@@ -318,7 +332,6 @@ start_syncthing () {
 		WAITCNT=$(($WAITCNT + 1))
 	done
 	adjust_home_path
-	#shim_end
 	log_info "$NAME instance $BASENAME started successfully"
 	log_end_msg $STATUS
 	STATUS=0
@@ -328,7 +341,14 @@ stop_syncthing () {
 	config_debug "STOP"
 	log_daemon_msg "${1:-Stopping syncthing instance '${BASENAME}'}"
 	adjust_arm_alignment
+	
+	# Syncthing spawns new processes on all sorts of occasions.
+	# So to use start-top-daemon to stop, we need to find the PID for ourselves and put it into the PIDFILE
+	# It's ugly and I know it
 	PIDFILE=/var/run/$NAME.$BASENAME.pid
+	pid_from_name "${BASENAME}"
+	echo "${PID}" > ${PIDFILE}
+	
 	STATUS=0
 	start-stop-daemon --stop --quiet \
 		--retry=TERM/30/KILL/5 \
@@ -354,10 +374,6 @@ stop_syncthing () {
 
 case "$1" in
 start)
-	# create config files from components
-	for COMPO in $(find "${CONFIG_DIR}" -maxdepth 1 -type d -name '*.'${CONFIG_EXT}'.d'); do
-		conffile_from_confdir "${COMPO}"
-	done
 	# autostart syncthing instances
 	if [ -z "$2" ]; then
 		# check if automatic startup is disabled by AUTOSTART=none
@@ -416,22 +432,28 @@ start)
 	;;
 stop)
 	if [ -z "$2" ]; then
-		PIDFILE=
-		for PIDFILE in `ls /var/run/$NAME.*.pid 2> /dev/null`; do
-			config_from_pidfile $PIDFILE
-			stop_syncthing
+		RUNNINGPID=
+
+		for CONFFILE in `cd $CONFIG_DIR; ls *.${CONFIG_EXT} 2> /dev/null`; do
+			credentials_from_conffile "${CONFFILE}"
+			pid_from_name "${BASENAME}"
+			if [ "${PID}" > 0 ]; then
+				RUNNINGPID=$PID
+				config_from_name $BASENAME
+				stop_syncthing
+			fi
 		done
-		if test -z "$PIDFILE" ; then
-			log_warning_msg "No syncthing instance is running."
+		if test -z "$RUNNINGPID" ; then
+			log_info "No syncthing instance is running."
 		fi
 		# the final hammer
-		pkill ${DAEMON_BINARY}
+		pkill -e -f ${DAEMON}
 	else
 		while shift ; do
 			[ -z "$1" ] && break
-			if [ -f /var/run/$NAME.$1.pid ]; then
-				PIDFILE=`ls /var/run/$NAME.$1.pid 2> /dev/null`
-				config_from_pidfile $PIDFILE
+			pid_from_name "${1}"
+			if [ "${PID}" > 0 ]; then
+				config_from_name $1
 				stop_syncthing
 			else
 				log_error_msg "Stopping syncthing instance '$1': No such syncthing instance is running."
@@ -441,11 +463,17 @@ stop)
 	# exit ${STATUS:-0}
 	;;
 status)
-	PIDFILE=
-	for PIDFILE in `ls /var/run/$NAME.*.pid 2> /dev/null`; do
-		config_from_pidfile $PIDFILE
-		config_debug "STATUS"
-		status_of_proc -p $PIDFILE $(basename $DAEMON) "SYNCTHING '${BASENAME}'"
+	for CONFFILE in `cd $CONFIG_DIR; ls *.${CONFIG_EXT} 2> /dev/null`; do
+		credentials_from_conffile "${CONFFILE}"
+		PIDFILE=/var/run/$NAME.$BASENAME.pid
+		
+		# Only check the status for instances with pidfiles
+		if [ -f "${PIDFILE}" ]; then
+			pid_from_name "${BASENAME}"
+			echo "${PID}" > ${PIDFILE}
+			config_debug "STATUS"
+			status_of_proc -p $PIDFILE $(basename $DAEMON) "SYNCTHING '${BASENAME}'"
+		fi
 	done
 	;;
 restart|force-reload)

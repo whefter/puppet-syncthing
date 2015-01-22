@@ -34,6 +34,7 @@ class syncthing::service
   
   service { 'syncthing':
     ensure  => running,
+    enable  => true,
     
     require => [
       File['/etc/init.d/syncthing']

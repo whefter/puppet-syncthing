@@ -10,7 +10,6 @@ class syncthing::params
     Debian        => '0.10.20',
     Ubuntu        => latest,
     default       => latest,
-    }
   }
   
   $instancespath          = '/etc/syncthing'
@@ -38,4 +37,5 @@ class syncthing::params
   
   $device_compression     = false
   $device_introducer      = false
+  $device_options         = {}
 }

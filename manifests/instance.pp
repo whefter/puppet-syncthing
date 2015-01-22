@@ -78,9 +78,6 @@ define syncthing::instance
 	      Service['syncthing'],
 	    ],
 	  }
-	  
-	  create_resources( ::syncthing::device, $devices )
-	  create_resources( ::syncthing::folder, $folders )
 	} else {
     file { [$home_path, $instance_config_path]:
       ensure      => absent,
