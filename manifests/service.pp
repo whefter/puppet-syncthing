@@ -1,8 +1,11 @@
 class syncthing::service
 (
-  
 )
 {
+  if ! defined(Class['syncthing']) {
+    fail('You must include the syncthing base class before using any syncthing defined resources')
+  }
+  
   file { '/etc/default/syncthing':
     content     => template('syncthing/default.erb'),
     owner       => 'root',
@@ -10,7 +13,7 @@ class syncthing::service
     mode        => '0744',
   }
     
-  file { $syncthing::instancespath:
+  file { $::syncthing::instancespath:
     ensure      => directory,
     owner       => 'root',
     group       => 'root',
@@ -25,7 +28,7 @@ class syncthing::service
     
     require     => [
 		  File['/etc/default/syncthing'],
-		  File[$syncthing::instancespath],
+		  File[$::syncthing::instancespath],
 		],
   }
   

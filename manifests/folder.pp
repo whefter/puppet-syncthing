@@ -1,18 +1,25 @@
 define syncthing::folder
 (
   $ensure           = 'present',
+  
   $home_path,
-  
-  $id,
-  
+  $id               = $name,
   $path,
+  
   $ro               = 'false',
   $rescanIntervalS  = '60',
   $ignorePerms      = 'false',
   
   $options          = {},
+  
+  # This is a hash containing pairs such as 'id' => 'absent/present'
+  $devices          = {},
 )
 {
+  if ! defined(Class['syncthing']) {
+    fail('You must include the syncthing base class before using any syncthing defined resources')
+  }
+  
   $instance_config_xml_path = "${home_path}/config.xml"
   
   if $ensure == 'present' {
@@ -29,6 +36,10 @@ define syncthing::folder
     
     notify      => [
       Service['syncthing'],
+    ],
+    
+    require     => [
+      Class['syncthing'],
     ],
   }
 }

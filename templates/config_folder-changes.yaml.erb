@@ -4,6 +4,13 @@
  - 'set folder[#attribute/id="<%= @id %>"]/#attribute/ro <%= @ro %>'
  - 'set folder[#attribute/id="<%= @id %>"]/#attribute/rescanIntervalS <%= @rescanIntervalS %>'
  - 'set folder[#attribute/id="<%= @id %>"]/#attribute/ignorePerms <%= @ignorePerms %>'
+<%- @devices.each do |dev_id, dev_ensure|
+        if dev_ensure == 'present' -%>
+ - 'set folder[#attribute/id="<%= @id %>"]/device/#attribute/id <%= dev_id %>'
+    <%- else -%>
+ - 'rm folder[#attribute/id="<%= @id %>"]/device[#attribute/id="<%= dev_id %>"]'
+<%-     end
+    end -%>
 <%- @options.each do |key, value|
         if value -%>
  - 'set folder[#attribute/id="<%= @id %>"]/<%= key %>/#text <%= value %>'

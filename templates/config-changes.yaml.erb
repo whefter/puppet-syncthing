@@ -1,6 +1,6 @@
 ---
- - 'set gui/#attribute/enabled <%= @gui %>'
- - 'set gui/#attribute/tls <%= @gui_tls %>'
+ - 'set gui/#attribute/enabled <%- if @gui -%>true<%- else -%>false<%- end -%>'
+ - 'set gui/#attribute/tls <%- if @gui_tls -%>true<%- else -%>false<%- end -%>'
  - 'set gui/address/#text <%= @gui_address %>:<%= @gui_port %>'
 <%- if @gui_apikey -%>
  - 'set gui/apikey/#text <%= @gui_apikey %>'

@@ -1,20 +1,22 @@
 define syncthing::device
 (
-  $home_path,
+  $ensure         = 'present',
   
+  $home_path,
   $id,
   
   $device_name    = $name,
-  $ensure         = 'present',
-  $compression,
-  $introducer,
+  $compression    = $::syncthing::device_compression,
+  $introducer     = $::syncthing::device_introducer,
   $address        = 'dynamic',
   
-  $options        = {},
-  
-  $folders        = {},
+  $options        = $::syncthing::device_options,
 )
 {
+  if ! defined(Class['syncthing']) {
+    fail('You must include the syncthing base class before using any syncthing defined resources')
+  }
+  
   $instance_config_xml_path = "${home_path}/config.xml"
   
   if $ensure == 'present' {
@@ -31,6 +33,10 @@ define syncthing::device
     
     notify      => [
       Service['syncthing'],
+    ],
+    
+    require     => [
+      Class['syncthing'],
     ],
   }
   

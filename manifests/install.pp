@@ -1,6 +1,5 @@
 class syncthing::install
 (
-  
 )
 {
   case $::operatingsystem {
@@ -11,8 +10,7 @@ class syncthing::install
 			    group         => root,
 			    mode          => '0755',
 			  }
-			  
-			  #https://github.com/syncthing/syncthing/releases/download/v0.10.20/syncthing-linux-amd64-v0.10.20.tar.gz
+			  ->
 			  exec { "download and unpack syncthing":
 			    #provider    => shell,
 			    cwd         => $syncthing::binpath,
@@ -20,14 +18,14 @@ class syncthing::install
 			    command     => "wget -O - https://github.com/syncthing/syncthing/releases/download/v${syncthing::version}/syncthing-linux-amd64-v${syncthing::version}.tar.gz | tar xzf - --strip-components=1",
 			    creates     => "${syncthing::binpath}/${syncthing::bin}",
 			    path        => $::path,
-			    
-			    require     => [
-			      File[$syncthing::binpath],
-			    ], 
 			  }
       }
       Ubuntu: {
-        package { 'syncthing': }
+        apt::ppa { 'ppa:ytvwld/syncthing': }
+        ->
+        package { 'syncthing':
+          ensure    => $syncthing::version,
+        }
       }
       default: {
           fail "Unsupported Operating System: ${::operatingsystem}"
