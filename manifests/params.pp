@@ -2,7 +2,7 @@ class syncthing::params
 (
 )
 {
-  $binpath                = '/usr/bin/syncthing'
+  $binpath                = '/usr/bin'
 
   $bin                    = 'syncthing'
 
