@@ -1,16 +1,41 @@
 {
+  "name": "whefter-syncthing",
+  "version": "0.1.0",
   "author": "William Hefter",
   "dependencies": [
     {"name":"puppetlabs/stdlib","version_requirement":">= 4.5.0"},
     {"name":"puppetlabs/apt","version_requirement":">= 1.7.0"}
   ],
-  "license": "GPL2",
-  "name": "whefter-syncthing",
-  "operatingsystem_support": [],
-  "project_page": "",
-  "requirements": [],
+  "license": "GPL-2",
+  "operatingsystem_support": [
+    {
+      "operatingsystem": "Debian",
+      "operatingsystemrelease": [
+        "6",
+        "7"
+      ]
+    },
+    {
+      "operatingsystem": "Ubuntu",
+      "operatingsystemrelease": [
+        "10.04",
+        "12.04",
+        "14.04"
+      ]
+    }
+  ],
+  "project_page": "https://github.com/whefter/puppet-syncthing",
+  "requirements": [
+    {
+      "name": "pe",
+      "version_requirement": "3.x"
+    },
+    {
+      "name": "puppet",
+      "version_requirement": "3.x"
+    }
+  ],
   "source": "https://github.com/whefter/puppet-syncthing.git",
   "summary": "Syncthing module for puppet",
-  "tags": [],
-  "version": "0.1.0"
+  "tags": []
 }
