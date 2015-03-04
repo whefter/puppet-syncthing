@@ -1,4 +1,5 @@
 #syncthing
+[![Build Status](https://travis-ci.org/whefter/puppet-syncthing.png)](https://travis-ci.org/whefter/puppet-syncthing)
 
 ####Table of Contents
 
