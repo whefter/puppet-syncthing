@@ -6,7 +6,7 @@
     {"name":"puppetlabs/stdlib","version_requirement":">= 4.5.0"},
     {"name":"puppetlabs/apt","version_requirement":">= 1.7.0"}
   ],
-  "license": "GPL-2",
+  "license": "GPL-2.0",
   "operatingsystem_support": [
     {
       "operatingsystem": "Debian",
