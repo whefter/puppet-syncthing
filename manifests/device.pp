@@ -26,16 +26,16 @@ define syncthing::device
   }
 
   augeas { "configure instance ${home_path} device ${id}": 
-    incl       => $instance_config_xml_path,
-    lens       => 'Xml.lns',
-    context    => "/files${instance_config_xml_path}/configuration",
-    changes    => $changes,
+    incl    => $instance_config_xml_path,
+    lens    => 'Xml.lns',
+    context => "/files${instance_config_xml_path}/configuration",
+    changes => $changes,
     
-    notify      => [
+    notify  => [
       Service['syncthing'],
     ],
     
-    require     => [
+    require => [
       Class['syncthing'],
     ],
   }

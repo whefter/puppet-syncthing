@@ -36,7 +36,7 @@ Daemonization is currently achieved through a modified version of the Yeasoft bt
 Install Syncthing, the service (init.d script) with default paths, no instances:
 
 ```puppet
-    class { 'syncthing':  }
+class { 'syncthing': }
 ```
 
 ###Syncthing instances
@@ -45,31 +45,31 @@ Instances can be declared directly in the Syncthing base class, or by defined ty
 
 ```puppet
 class { '::syncthing':
-    instances   => {
-        'example'   => {
-            home_path      => '/home/synctester/example_instance',
-            daemon_uid     => 'synctest', // Default: root
-            daemon_gid     => 'synctester', // Default: root
-            
-            // Variables for standard parameters
-            gui_tls        => true,
-            gui_address    => '0.0.0.0', // (Default)
-            gui_port       => '8888', // Default: 8080
+  instances => {
+    'example' => {
+      home_path   => '/home/synctester/example_instance',
+      daemon_uid  => 'synctest', // Default: root
+      daemon_gid  => 'synctester', // Default: root
 
-            // Override or set arbitrary options
-            options        => {
-                'listenAddress'   => '0.0.0.0:19000',
-                'startBrowser'    => 'false',
-            },
-        }
+      // Variables for standard parameters
+      gui_tls     => true,
+      gui_address => '0.0.0.0', // (Default)
+      gui_port    => '8888', // Default: 8080
+
+      // Override or set arbitrary options
+      options     => {
+        'listenAddress' => '0.0.0.0:19000',
+        'startBrowser'  => 'false',
+      },
     }
+  }
 }
 ```
 or:
 ```puppet
 ::syncthing::instance { 'example':
-    home_path      => '/home/synctester/example_instance',
-    ...
+  home_path => '/home/synctester/example_instance',
+  ...
 }
 ```
 
@@ -185,11 +185,11 @@ Override the default value passed to `syncthing::device` for `options`.
 Creates an instance. Provides some parameters for common options and an `options` parameter to override or set arbitrary options.
 
 ```puppet
-    syncthing::instance { 'example':
-        home_path      => '/etc/backups/example',
-        daemon_uid     => 'user',
-        gui_tls        => true,
-    }
+  syncthing::instance { 'example':
+    home_path  => '/etc/backups/example',
+    daemon_uid => 'user',
+    gui_tls    => true,
+  }
 ```
 
 **Parameters within `syncthing::instance`:**
@@ -262,11 +262,11 @@ Set or override arbitrary options. Created as XML nodes in the `<options></optio
 Adds a `<device>` entry to the configuration file for the instance associated with the passed home path.
 
 ```puppet
-    ::syncthing::device { 'laptop':
-	    home_path    => '/etc/backup/instance1',
-	    id           => '523LMDC-KKQPKVU-JBPGYQU-IAGHP5B-TU38GN4-G7CEEHG-OOL32IR-YWQSFAX',
-	    compression  => true,
-    }
+  ::syncthing::device { 'laptop':
+    home_path   => '/etc/backup/instance1',
+    id          => '523LMDC-KKQPKVU-JBPGYQU-IAGHP5B-TU38GN4-G7CEEHG-OOL32IR-YWQSFAX',
+    compression => true,
+  }
 ```
 
 **Parameters within `syncthing::device`:**
@@ -308,17 +308,17 @@ Set or override arbitrary options. Created as XML nodes in the `<device></device
 Adds a `<folder>` entry to the configuration file for the instance associated with the passed home path.
 
 ```puppet
-    ::syncthing::folder { 'laptop':
-	    home_path    => '/etc/backup/instance1',
-	    id           => 'backupfolder1',
-	    path         => '/home/syncuser/myfiles',
-		options      => {
-			# Override options here
-		},
-		devices      => {
-			'523LMDC-KKQPKVU-JBPGYQU-IAGHP5B-TU38GN4-G7CEEHG-OOL32IR-YWQSFAX' => 'present',
-		}
-    }
+::syncthing::folder { 'laptop':
+  home_path => '/etc/backup/instance1',
+  id        => 'backupfolder1',
+  path      => '/home/syncuser/myfiles',
+  options   => {
+    # Override options here
+  },
+  devices   => {
+    '523LMDC-KKQPKVU-JBPGYQU-IAGHP5B-TU38GN4-G7CEEHG-OOL32IR-YWQSFAX' => 'present',
+  }
+}
 ```
 
 **Parameters within `syncthing::folder`:**
@@ -360,14 +360,14 @@ Set or override arbitrary options. Created as XML nodes in the `<folder></folder
 A hash of devices to enable for the folder. Invididual device IDs can be specified and set to `present` or `absent`:
 
 ```puppet
-    ::syncthing::folder { 'laptop':
-	    ...
-		devices      => {
-			'523LMDC-KKQPKVU-JBPGYQU-IAGHP5B-TU38GN4-G7CEEHG-OOL32IR-YWQSFAX' => 'present',
-			'IAGHP5B-7IASKM-JBPGYQU-G7CEEHG-TU38GN4-TU38GN4-523LMDC-OOL32IR' => 'absent',
-		}
-		...
-    }
+::syncthing::folder { 'laptop':
+  ...
+  devices => {
+    '523LMDC-KKQPKVU-JBPGYQU-IAGHP5B-TU38GN4-G7CEEHG-OOL32IR-YWQSFAX' => 'present',
+    'IAGHP5B-7IASKM-JBPGYQU-G7CEEHG-TU38GN4-TU38GN4-523LMDC-OOL32IR'  => 'absent',
+  }
+  ...
+}
 ```
 
 ####Defined Type: `syncthing::folder_device`
@@ -375,11 +375,11 @@ A hash of devices to enable for the folder. Invididual device IDs can be specifi
 Adds a `<device>` entry for the specified folder.
 
 ```puppet
-    ::syncthing::folder { 'laptop_on_backupfolder1':
-	    home_path    => '/etc/backup/instance1',
-	    folder_id    => 'backupfolder1',
-	    device_id    => '523LMDC-KKQPKVU-JBPGYQU-IAGHP5B-TU38GN4-G7CEEHG-OOL32IR-YWQSFAX',
-    }
+::syncthing::folder { 'laptop_on_backupfolder1':
+  home_path => '/etc/backup/instance1',
+  folder_id => 'backupfolder1',
+  device_id => '523LMDC-KKQPKVU-JBPGYQU-IAGHP5B-TU38GN4-G7CEEHG-OOL32IR-YWQSFAX',
+}
 ```
 
 **Parameters within `syncthing::folder_device`:**

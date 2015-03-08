@@ -1,7 +1,4 @@
-class syncthing::params
-(
-)
-{
+class syncthing::params {
   $binpath                = '/usr/bin'
 
   $bin                    = 'syncthing'
