@@ -1,15 +1,23 @@
 class syncthing::params {
-  $binpath                = '/usr/bin'
-
   $bin                    = 'syncthing'
-
-  $version                = $::operatingsystem ? {
-    Debian        => '0.10.20',
-    Ubuntu        => latest,
-    default       => latest,
-  }
-  
+  $store_path             = '/usr/local/share/syncthing'
+  $binpath                = '/usr/local/bin'
   $instancespath          = '/etc/syncthing'
+
+  # These three variables are required to detect/build the correct download URL
+  # $version can be set to latest and the download URL will be detected
+  # using the Github API.
+  $version                = 'latest'
+  $architecture           = $::architecture ? {
+    /64$/       => 'amd64',
+    /86$/       => '386',
+    /^arm/      => 'arm',
+    default     => $::architecture,
+  }
+  $kernel                 = $::kernel ? {
+    /^(L|l)inux$/       => 'linux',
+    default             => $::kernel,
+  }  
 
   $default_instances      = {}
   $default_devices        = {}

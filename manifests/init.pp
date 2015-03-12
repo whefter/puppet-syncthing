@@ -1,9 +1,12 @@
 class syncthing
 (
-  $binpath            = $::syncthing::params::binpath,
   $bin                = $::syncthing::params::bin,
-  $version            = $::syncthing::params::version,
+  $binpath            = $::syncthing::params::binpath,
+  $store_path         = $::syncthing::params::store_path,
   $instancespath      = $::syncthing::params::instancespath,
+  $architecture       = $::syncthing::params::architecture,
+  $version            = $::syncthing::params::version,
+  $kernel             = $::syncthing::params::kernel,
   
   $instances          = $::syncthing::params::default_instances,
   $devices            = $::syncthing::params::default_devices,

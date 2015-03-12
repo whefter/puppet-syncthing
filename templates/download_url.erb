@@ -1,0 +1,16 @@
+<%-
+require 'uri'
+
+releases = JSON.parse(open('https://api.github.com/repos/syncthing/syncthing/releases') { |io| io.read })
+
+if scope.lookupvar('::syncthing::version') == 'latest'
+	release = releases.first
+else
+	release = releases.select { |item| item['name'] == "v#{scope.lookupvar('::syncthing::version')}" }.first
+end
+
+asset = release['assets'].select { |item|
+	uri = URI.parse(item['browser_download_url'])
+	File.basename(uri.path) =~ /^syncthing-#{scope.lookupvar('::syncthing::kernel')}-#{scope.lookupvar('::syncthing::architecture')}-v/	
+}.first
+-%><%= asset['browser_download_url'] %>

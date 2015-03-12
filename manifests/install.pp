@@ -1,29 +1,29 @@
 class syncthing::install {
-
-  case $::operatingsystem {
+  $download_url = strip(template('syncthing/download_url.erb'))
+  $basename     = regsubst(inline_template('<%- require "uri" -%><%= File.basename(URI.parse(@download_url).path) %>'), '(-v\d+\.\d+\.\d+)[\w\.]+$', '\1', '')
+  notify { $basename:}
+  
+  case $::osfamily {
     Debian: {
-      file { $syncthing::binpath:
+      file { $::syncthing::store_path:
         ensure => 'directory',
         owner  => 'root',
         group  => 'root',
         mode   => '0755',
       }->
       exec { "download and unpack syncthing":
-        cwd     => $syncthing::binpath,
-        command => "wget -O - https://github.com/syncthing/syncthing/releases/download/v${syncthing::version}/syncthing-linux-amd64-v${syncthing::version}.tar.gz | tar xzf - --strip-components=1 syncthing-linux-amd64-v${syncthing::version}/syncthing",
-        creates => "${syncthing::binpath}/${syncthing::bin}",
+        cwd     => $::syncthing::store_path,
         path    => $::path,
-      }
-    }
-    Ubuntu: {
-      apt::ppa { 'ppa:ytvwld/syncthing': }
-      ->
-      package { 'syncthing':
-        ensure => $syncthing::version,
+        command => "wget -O - ${download_url} | tar xzf -",
+        creates => "${::syncthing::store_path}/${basename}",
+      }->
+      file { "${::syncthing::binpath}/${::syncthing::bin}":
+        ensure  => link,
+        target  => "${::syncthing::store_path}/${basename}/syncthing",
       }
     }
     default: {
-        fail "Unsupported Operating System: ${::operatingsystem}"
+        fail "Unsupported OS family: ${::osfamily}"
     }
   }
 
