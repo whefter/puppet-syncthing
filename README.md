@@ -80,25 +80,37 @@ or:
 
 ####Class: `syncthing`
 
-Installs Syncthing and sets up the init.d service.
+Installs Syncthing and sets up the init.d service. The download URL is determined from the Syncthing Github releases page.
 
 **Parameters within `syncthing`:**
-
-#####`binpath`
-
-Override the assumed value for the path to the Syncthing binary. Defaults to `/usr/bin/syncthing`.
 
 #####`bin`
 
 Override the assumed value for the Syncthing binary name. Defaults to `syncthing`.
 
-#####`version`
+#####`binpath`
 
-Override the value used for the installation. Currently, only Ubuntu makes use of a package repository (`ppa:ytvwld/syncthing`), in which case `latest` is used by default. Otherwise, the version currently in use during latest commit is used by default.
+Override the assumed value for the path to the Syncthing binary. Defaults to `/usr/local/bin`. This will actually by a symlink to the latest downloaded syncthing Binary.
+
+#####`store_path`
+
+Override the assumed path to store downloaded and extracted Syncthing releases in. Defaults to `/usr/local/share/syncthing`.
 
 #####`instancespath`
 
 Override the assumed value to the Syncthing instances configuration files. Defaults to `/etc/syncthing`.
+
+#####`architecture`
+
+Override the architecture parameter determined via Facter. Used in determining the download URL for Syncthing.
+
+#####`version`
+
+Override the value used for the installation. Defaults to `latest`, in which case new releases will be downloaded when they are publishing on the Syncthing Github page. Note that Syncthing also has an auto-update mechanism.
+
+#####`kernel`
+
+Override the kernel parameter determined via Facter. Used in determining the download URL for Syncthing.
 
 #####`instances`
 
