@@ -1,9 +1,9 @@
 define syncthing::device
 (
-  $ensure         = 'present',
-  
   $home_path,
   $id,
+  
+  $ensure         = 'present',
   
   $device_name    = $name,
   $compression    = $::syncthing::device_compression,
@@ -25,7 +25,7 @@ define syncthing::device
     $changes = "rm device[#attribute/id='${id}']"
   }
 
-  augeas { "configure instance ${home_path} device ${id}": 
+  augeas { "configure instance ${home_path} device ${id}":
     incl    => $instance_config_xml_path,
     lens    => 'Xml.lns',
     context => "/files${instance_config_xml_path}/configuration",

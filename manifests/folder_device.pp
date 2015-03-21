@@ -1,11 +1,11 @@
 define syncthing::folder_device
 (
-  $ensure           = 'present',
-  
   $home_path,
   
   $folder_id,
   $device_id,
+  
+  $ensure           = 'present',
 )
 {
   if ! defined(Class['syncthing']) {
@@ -20,7 +20,7 @@ define syncthing::folder_device
     $changes = "rm folder[#attribute/id='${folder_id}']/device[#attribute/id='${device_id}']"
   }
 
-  augeas { "configure instance ${home_path} folder ${folder_id} device ${device_id}": 
+  augeas { "configure instance ${home_path} folder ${folder_id} device ${device_id}":
     incl    => $instance_config_xml_path,
     lens    => 'Xml.lns',
     context => "/files${instance_config_xml_path}/configuration",

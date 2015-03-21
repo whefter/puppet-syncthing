@@ -17,13 +17,13 @@ response = https.start { |context| context.request(req) }
 releases = JSON.parse(response.body)
 
 if scope.lookupvar('::syncthing::version') == 'latest'
-	release = releases.first
+  release = releases.first
 else
-	release = releases.select { |item| item['name'] == "v#{scope.lookupvar('::syncthing::version')}" }.first
+  release = releases.select { |item| item['name'] == "v#{scope.lookupvar('::syncthing::version')}" }.first
 end
 
 asset = release['assets'].select { |item|
-	uri = URI.parse(item['browser_download_url'])
-	File.basename(uri.path) =~ /^syncthing-#{scope.lookupvar('::syncthing::kernel')}-#{scope.lookupvar('::syncthing::architecture')}-v/	
+  uri = URI.parse(item['browser_download_url'])
+  File.basename(uri.path) =~ /^syncthing-#{scope.lookupvar('::syncthing::kernel')}-#{scope.lookupvar('::syncthing::architecture')}-v/  
 }.first
 -%><%= asset['browser_download_url'] %>

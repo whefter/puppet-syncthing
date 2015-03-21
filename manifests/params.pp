@@ -17,7 +17,7 @@ class syncthing::params {
   $kernel                 = $::kernel ? {
     /^(L|l)inux$/       => 'linux',
     default             => $::kernel,
-  }  
+  }
 
   $default_instances      = {}
   $default_devices        = {}

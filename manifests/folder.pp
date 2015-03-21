@@ -1,14 +1,15 @@
 define syncthing::folder
 (
-  $ensure           = 'present',
-  
   $home_path,
-  $id               = $name,
   $path,
   
-  $ro               = 'false',
+  $ensure           = 'present',
+  
+  $id               = $name,
+  
+  $ro               = false,
   $rescanIntervalS  = '60',
-  $ignorePerms      = 'false',
+  $ignorePerms      = false,
   
   $options          = {},
   
@@ -28,7 +29,7 @@ define syncthing::folder
     $changes = "rm folder[#attribute/id='${id}']"
   }
 
-  augeas { "configure instance ${home_path} folder ${id}": 
+  augeas { "configure instance ${home_path} folder ${id}":
     incl    => $instance_config_xml_path,
     lens    => 'Xml.lns',
     context => "/files${instance_config_xml_path}/configuration",
