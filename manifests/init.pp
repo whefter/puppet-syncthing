@@ -31,8 +31,8 @@ class syncthing
   $device_introducer  = $::syncthing::params::device_introducer,
   $device_options     = $::syncthing::params::device_options,
 )
+inherits ::syncthing::params
 {
-  include ::syncthing::params
   class { '::syncthing::install': } ->
   class { '::syncthing::service': }
   
