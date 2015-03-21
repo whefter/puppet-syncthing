@@ -1,5 +1,5 @@
 <%-
-require 'uri'
+require 'open-uri'
 
 releases = JSON.parse(open('https://api.github.com/repos/syncthing/syncthing/releases') { |io| io.read })
 
