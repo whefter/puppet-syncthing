@@ -36,6 +36,6 @@
     }
   ],
   "source": "https://github.com/whefter/puppet-syncthing.git",
-  "summary": "Syncthing module for puppet",
+  "summary": "Syncthing module for Puppet.",
   "tags": []
 }
