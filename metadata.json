@@ -3,7 +3,7 @@
   "version": "0.2.0",
   "author": "William Hefter",
   "dependencies": [
-    {"name":"puppetlabs/stdlib","version_requirement":">= 4.5.0"}
+    {"name":"puppetlabs/stdlib","version_requirement":">= 4.5.0 < 5.0.0"}
   ],
   "license": "GPL-2.0",
   "operatingsystem_support": [
@@ -24,6 +24,7 @@
     }
   ],
   "project_page": "https://github.com/whefter/puppet-syncthing",
+  "issues_url": "https://github.com/whefter/puppet-syncthing/issues",
   "requirements": [
     {
       "name": "pe",
