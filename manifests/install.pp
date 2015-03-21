@@ -1,8 +1,7 @@
 class syncthing::install {
   $download_url = strip(template('syncthing/download_url.erb'))
   $basename     = regsubst(inline_template('<%- require "uri" -%><%= File.basename(URI.parse(@download_url).path) %>'), '(-v\d+\.\d+\.\d+)[\w\.]+$', '\1', '')
-  notify { $basename:}
-  
+    
   case $::osfamily {
     Debian: {
       file { $::syncthing::store_path:
