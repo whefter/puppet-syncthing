@@ -22,11 +22,11 @@
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="Open source P2P file synchronisation daemon(s)"
-NAME=<%= scope.lookupvar('syncthing::bin') %>
-DAEMON=<%= scope.lookupvar('syncthing::binpath') %>/<%= scope.lookupvar('syncthing::bin') %>
-DAEMON_BINARY=<%= scope.lookupvar('syncthing::bin') %>
+NAME=syncthing
+DAEMON=<%= scope.lookupvar('syncthing::binpath') %>
+DAEMON_BINARY=syncthing
 DAEMON_ARGS=""
-SCRIPTNAME=/etc/init.d/<%= scope.lookupvar('syncthing::bin') %>
+SCRIPTNAME=/etc/init.d/syncthing
 CONFIG_DIR=<%= scope.lookupvar('syncthing::instancespath') %>
 CONFIG_EXT=conf
 AUTOSTART="all"
