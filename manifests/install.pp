@@ -1,6 +1,6 @@
 class syncthing::install {
   case $::osfamily {
-    Debian: {
+    'Debian': {
         include ::apt
 
         ::apt::key { '00654A3E':
