@@ -60,6 +60,8 @@ define syncthing::instance
       ],
     }
 
+    $gui_password_hashed = bcrypt($gui_password)
+
     $changes = parseyaml( template('syncthing/config-changes.yaml.erb') )
 
     #notify { 'debug': message => $changes }
