@@ -8,7 +8,9 @@
 <%- if @gui_user -%>
  - 'set gui/user/#text <%= @gui_user %>'
 <%- end -%>
-<%- if @gui_password -%>
+<%- if @gui_password_hashed -%>
+ - 'set gui/password/#text <%= @gui_password_hashed %>'
+<%- elsif @gui_password -%>
  - 'set gui/password/#text <%= @gui_password %>'
 <%- end -%>
 <%- @gui_options.each do |key, value|
