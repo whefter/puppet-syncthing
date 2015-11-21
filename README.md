@@ -172,6 +172,10 @@ Override the default value passed to `syncthing::instance`for `gui_user`.
 
 Override the default value passed to `syncthing::instance`for `gui_password`.
 
+#####`gui_password_salt`
+
+Override the default value passed to `syncthing::instance`for `gui_password_salt`.
+
 #####`gui_options`
 
 Override the default value passed to `syncthing::instance`for `gui_options`.
@@ -259,7 +263,11 @@ Providing this and `gui_password` enables user authentication.
 
 #####`gui_password`
 
-Password to use to authenticate for the GUI. Currently does not perform encryption, i.e. only accepts `bcrypt`-encoded strings.
+Password to use to authenticate for the GUI. Password is encrypted with BCrypt, provided a valid salt is passed to gui_password_salt
+
+#####`gui_password_salt`
+
+When specifying a password, this must be set to a valid BCrypt salt such as `$2a$10$vI8aWBnW3fID.ZQ4/zo1G.`
 
 #####`gui_options`
 
