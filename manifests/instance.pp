@@ -17,6 +17,7 @@ define syncthing::instance
   $gui_apikey         = $::syncthing::gui_apikey,
   $gui_user           = $::syncthing::gui_user,
   $gui_password       = $::syncthing::gui_password,
+  $gui_password_salt  = $::syncthing::gui_password_salt,
   $gui_options        = $::syncthing::gui_options,
 
   $options            = $::syncthing::instance_options,
@@ -29,6 +30,14 @@ define syncthing::instance
   validate_bool($gui)
   validate_hash($gui_options)
   validate_hash($options)
+  
+  if $gui_password_salt {
+    validate_string($gui_password_salt)
+  }
+
+  if $gui_password and !$gui_password_salt {
+    fail("When specifying a GUI password, a salt must be supplied (or else your instance will restart on every puppet run.")
+  }
 
   $instance_config_path     = "${syncthing::instancespath}/${name}.conf"
   $instance_config_xml_path = "${home_path}/config.xml"
@@ -60,7 +69,7 @@ define syncthing::instance
       ],
     }
 
-    $gui_password_hashed = bcrypt($gui_password)
+    $gui_password_hashed = bcrypt($gui_password, $gui_password_salt)
 
     $changes = parseyaml( template('syncthing/config-changes.yaml.erb') )
 

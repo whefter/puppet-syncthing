@@ -21,6 +21,7 @@ class syncthing::params {
   $gui_apikey             = undef
   $gui_user               = undef
   $gui_password           = undef
+  $gui_password_salt      = undef
   $gui_options            = {}
 
   $instance_options       = {}
