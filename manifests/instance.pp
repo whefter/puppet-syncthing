@@ -35,9 +35,9 @@ define syncthing::instance
     validate_string($gui_password_salt)
   }
 
-  if $gui_password and !$gui_password_salt {
-    fail("When specifying a GUI password, a salt must be supplied (or else your instance will restart on every puppet run.")
-  }
+#  if $gui_password and !$gui_password_salt {
+#    fail("When specifying a GUI password, a salt must be supplied (or else your instance will restart on every puppet run.")
+#  }
 
   $instance_config_path     = "${syncthing::instancespath}/${name}.conf"
   $instance_config_xml_path = "${home_path}/config.xml"
