@@ -69,7 +69,11 @@ define syncthing::instance
       ],
     }
 
-    $gui_password_hashed = bcrypt($gui_password, $gui_password_salt)
+    if $gui_password_salt {
+      $gui_password_hashed = bcrypt($gui_password, $gui_password_salt)
+    } else {
+      $gui_password_hashed = undef
+    }
 
     $changes = parseyaml( template('syncthing/config-changes.yaml.erb') )
 
