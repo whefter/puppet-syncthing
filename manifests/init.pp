@@ -3,6 +3,7 @@ class syncthing
   $binpath            = $::syncthing::params::binpath,
   $instancespath      = $::syncthing::params::instancespath,
   $version            = $::syncthing::params::version,
+  $manage_repo        = $::syncthing::params::manage_repo,
 
   $instances          = $::syncthing::params::default_instances,
   $devices            = $::syncthing::params::default_devices,
@@ -29,6 +30,7 @@ class syncthing
 )
 inherits ::syncthing::params
 {
+  class { '::syncthing::repo': } ->
   class { '::syncthing::install': } ->
   class { '::syncthing::service': }
 
