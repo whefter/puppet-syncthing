@@ -3,8 +3,9 @@ class syncthing::params {
   $instancespath          = '/etc/syncthing'
 
   $version                = 'latest'
-  
+
   $manage_repo            = true
+  $package_name           = 'syncthing'
 
   $default_instances      = {}
   $default_devices        = {}

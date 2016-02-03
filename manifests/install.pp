@@ -1,5 +1,5 @@
 class syncthing::install {
-  package { 'syncthing':
+  package { $::syncthing::package_name:
     ensure  => $::syncthing::version,
   }
 }
