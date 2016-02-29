@@ -113,6 +113,11 @@ Override the value used for the installation. Defaults to `latest`, in which cas
 Boolean to install syncthing APT repository. Defaults to `true`.
 Set it to `false` to control package installation using your internal / personal repository.
 
+#####`package_name`
+
+The name of the package that will be used for syncthing installation. Defaults to `syncthing`.
+Nice option for those we built their own packages.
+
 #####`kernel`
 
 Override the kernel parameter determined via Facter. Used in determining the download URL for Syncthing.
