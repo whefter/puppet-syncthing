@@ -182,6 +182,8 @@ Override the default value passed to `syncthing::instance`for `gui_user`.
 
 Override the default value passed to `syncthing::instance`for `gui_password`.
 
+> See the notes on `gui_password` and `gui_password_salt` in the parameters for `syncthing::instance` for some important information regarding these two options.
+
 #####`gui_password_salt`
 
 Override the default value passed to `syncthing::instance`for `gui_password_salt`.
@@ -273,13 +275,13 @@ Providing this and `gui_password` enables user authentication.
 
 #####`gui_password`
 
-Password to use to authenticate for the GUI. Password is encrypted with BCrypt, provided a valid salt is passed to gui_password_salt
+Password to use to authenticate for the GUI. Password is encrypted with BCrypt, provided a salt (not checked for validity) is passed to `gui_password_salt`.
 
 #####`gui_password_salt`
 
 When specifying a password, this must be set to a valid BCrypt salt such as `$2a$10$vI8aWBnW3fID.ZQ4/zo1G.`
 
-> Setting this parameter will result in the module attempting to generate a bcrypt-encrypted password. This requires the `bcrypt` gem to be installed on the puppetmaster.
+> Setting this parameter will result in the module attempting to generate a BCrypt-encrypted password. This requires the `bcrypt` gem to be installed on the puppetmaster.
 
 #####`gui_options`
 
