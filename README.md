@@ -269,6 +269,8 @@ Password to use to authenticate for the GUI. Password is encrypted with BCrypt, 
 
 When specifying a password, this must be set to a valid BCrypt salt such as `$2a$10$vI8aWBnW3fID.ZQ4/zo1G.`
 
+> Setting this parameter will result in the module attempting to generate a bcrypt-encrypted password. This requires the `bcrypt` gem to be installed on the puppetmaster.
+
 #####`gui_options`
 
 Set or override arbitrary GUI options. Created as XML nodes in the `<gui></gui>` element.
@@ -441,7 +443,7 @@ The ID of the device.
 * `syncthing::instance`
 * `syncthing::device`
 * `syncthing::folder`
-* `apache::folder_device`: Adds a known device to a folder.
+* `syncthing::folder_device`: Adds a known device to a folder.
 
 ##Limitations
 

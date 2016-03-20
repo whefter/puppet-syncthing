@@ -70,7 +70,7 @@ define syncthing::instance
     }
 
     if $gui_password_salt {
-      $gui_password_hashed = bcrypt($gui_password, $gui_password_salt)
+      $gui_password_hashed = syncthing_bcrypt($gui_password, $gui_password_salt)
     } else {
       $gui_password_hashed = undef
     }
