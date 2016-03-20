@@ -18,7 +18,7 @@ class syncthing::repo {
             include_src => false,
             require     => Apt::Key[$release_key],
             before      => [
-              Package['syncthing'],
+              Package[$::syncthing::package_name],
             ]
           }
       }

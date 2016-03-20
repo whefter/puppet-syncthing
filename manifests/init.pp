@@ -4,6 +4,7 @@ class syncthing
   $instancespath      = $::syncthing::params::instancespath,
   $version            = $::syncthing::params::version,
   $manage_repo        = $::syncthing::params::manage_repo,
+  $package_name       = $::syncthing::params::package_name,
 
   $instances          = $::syncthing::params::default_instances,
   $devices            = $::syncthing::params::default_devices,
