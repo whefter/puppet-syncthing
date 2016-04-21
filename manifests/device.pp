@@ -20,7 +20,13 @@ define syncthing::device
   $instance_config_xml_path = "${home_path}/config.xml"
 
   if $ensure == 'present' {
-    $changes = parseyaml( template('syncthing/config_device-changes.yaml.erb') )
+    $changes = [
+      "set device[#attribute/id='${id}']/#attribute/id ${id}",
+      "set device[#attribute/id='${id}']/#attribute/name ${device_name}",
+      "set device[#attribute/id='${id}']/#attribute/compression ${compression}",
+      "set device[#attribute/id='${id}']/#attribute/introducer ${introducer}",
+      "set device[#attribute/id='${id}']/#attribute/introducer ${introducer}",
+    ]
   } else {
     $changes = "rm device[#attribute/id='${id}']"
   }
