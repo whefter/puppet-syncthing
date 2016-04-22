@@ -31,7 +31,7 @@ class syncthing::params {
 
   $instance_options       = {}
 
-  $device_compression     = false
+  $device_compression     = 'metadata'
   $device_introducer      = false
   $device_options         = {}
 }

@@ -17,6 +17,8 @@ define syncthing::device
     fail('You must include the syncthing base class before using any syncthing defined resources')
   }
 
+  validate_re($compression, '^(metadata|always|never)$')
+
   $instance_config_xml_path = "${home_path}/config.xml"
 
   Augeas {
