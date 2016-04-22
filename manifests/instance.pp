@@ -56,7 +56,7 @@ define syncthing::instance
 
     exec { "create syncthing instance ${name} home":
       path     => $::path,
-      command  => "su - ${daemon_uid} -c \"${syncthing::binpath} -generate \\\"${home_path}\\\"\"",
+      command  => "sudo -u ${daemon_uid} ${syncthing::binpath} -generate \"${home_path}\"",
       creates  => $instance_config_xml_path,
       provider => shell,
 
