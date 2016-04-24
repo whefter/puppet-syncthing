@@ -33,18 +33,39 @@ define syncthing::device
   }
 
   if $ensure == 'present' {
-    $changes = [
-      "set device[#attribute/id='${id}']/#attribute/id ${id}",
-      "set device[#attribute/id='${id}']/#attribute/name ${device_name}",
-      "set device[#attribute/id='${id}']/#attribute/compression ${compression}",
-      "set device[#attribute/id='${id}']/#attribute/introducer ${introducer}",
-      "set device[#attribute/id='${id}']/#attribute/introducer ${introducer}",
-    ]
+
+    augeas { "update device ${id} in instance ${home_path}":
+      changes => [
+        "set device[#attribute/id='${id}']/#attribute/name ${device_name}",
+        "set device[#attribute/id='${id}']/#attribute/compression ${compression}",
+        "set device[#attribute/id='${id}']/#attribute/introducer ${introducer}",
+      ],
+      onlyif => "match device[#attribute/id='${id}'] size > 0",
+    }
+
+    augeas { "create device ${id} in instance ${home_path}":
+      changes => [
+        "ins #text after device[last()]",
+        "set device[last()]/following-sibling::#text[1] '    '",
+        "ins device after device[last()]/following-sibling::#text[1]",
+        "set device[last()]/#attribute/id ${id}",
+        "set device[#attribute/id='${id}']/#attribute/name ${device_name}",
+        "set device[#attribute/id='${id}']/#attribute/compression ${compression}",
+        "set device[#attribute/id='${id}']/#attribute/introducer ${introducer}",
+      ],
+      onlyif => "match device[#attribute/id='${id}'] size == 0",
+    }
+
   } else {
-    $changes = "rm device[#attribute/id='${id}']"
+
+    augeas { "remove device ${id} in instance ${home_path}":
+      changes => [
+        "rm device[#attribute/id='${id}']/preceding-sibling::#text[1]",
+        "rm device[#attribute/id='${id}']",
+      ],
+      onlyif => "match device[#attribute/id='${id}'] size > 0",
+    }
+
   }
 
-  augeas { "configure instance ${home_path} device ${id}":
-    changes => $changes,
-  }
 }
