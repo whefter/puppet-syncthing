@@ -18,6 +18,7 @@ define syncthing::device
   }
 
   validate_re($compression, '^(metadata|always|never)$')
+  validate_bool($introducer)
 
   $instance_config_xml_path = "${home_path}/config.xml"
 
