@@ -5,12 +5,12 @@ class syncthing::repo {
     case $::osfamily {
       'Debian': {
           include ::apt
-  
+
           ::apt::key { $release_key:
             ensure     => present,
             key_source => 'https://syncthing.net/release-key.txt',
           }
-  
+
           ::apt::source { 'syncthing':
             location    => 'http://apt.syncthing.net',
             release     => 'syncthing',
