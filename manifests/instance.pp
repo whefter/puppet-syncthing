@@ -30,7 +30,7 @@ define syncthing::instance
   validate_bool($gui)
   validate_hash($gui_options)
   validate_hash($options)
-  
+
   if $gui_password_salt {
     validate_string($gui_password_salt)
   }
