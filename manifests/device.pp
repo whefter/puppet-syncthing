@@ -36,7 +36,7 @@ define syncthing::device
     ],
 
     require => [
-      Class['syncthing'],
+      Exec["create syncthing instance ${home_path}"],
     ],
   }
 }

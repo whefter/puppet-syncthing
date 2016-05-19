@@ -1,7 +1,12 @@
 define syncthing::folder
 (
+  # Path to the config.xml file that should be edited. This serves
+  # to identify the instance.
   $home_path,
+
+  # Path to the folder
   $path,
+  $label            = '',
 
   $ensure           = 'present',
 
@@ -40,7 +45,7 @@ define syncthing::folder
     ],
 
     require => [
-      Class['syncthing'],
+      Exec["create syncthing instance ${home_path}"],
     ],
   }
 }
