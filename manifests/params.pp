@@ -11,6 +11,8 @@ class syncthing::params {
   $default_devices        = {}
   $default_folders        = {}
 
+  $create_home_path       = false
+
   $daemon_uid             = 'root'
   $daemon_gid             = 'root'
   $daemon_umask           = '0002'

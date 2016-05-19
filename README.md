@@ -134,6 +134,10 @@ Hash that will be used to declare `syncthing::folder` resources.
 
 Hash that will be used to declare `syncthing::device` resources.
 
+#####`create_home_path`
+
+Override the default value passed to `syncthing::instance`for `create_home_path`.
+
 #####`daemon_uid`
 
 Override the default value passed to `syncthing::instance`for `daemon_uid`.
@@ -229,6 +233,11 @@ Specify whether the instance configuration file is present or absent. Defaults t
 #####`home_path`
 
 The home path for this instance. Where the configuration file and all certificates are stored. Mandatory parameter, will be created by Syncthing if not present.
+
+#####`create_home_path`
+
+Attempt to recursively create the passed home path prior to calling Syncthing to generate the configuration/certificates. This will be
+called in the context of the user identified by `daemon_uid`.
 
 #####`daemon_uid`
 

@@ -4,6 +4,8 @@ define syncthing::instance
 
   $ensure             = 'present',
 
+  $create_home_path   = $::syncthing::create_home_path,
+
   $daemon_uid         = $::syncthing::daemon_uid,
   $daemon_gid         = $::syncthing::daemon_gid,
   $daemon_umask       = $::syncthing::daemon_umask,
@@ -54,7 +56,20 @@ define syncthing::instance
       ],
     }
 
-    exec { "create syncthing instance ${name} home":
+    if $create_home_path {
+      exec { "create syncthing instance ${name} home path":
+        path     => $::path,
+        command  => "sudo -u ${daemon_uid} mkdir -p \"${home_path}\"",
+        creates  => $home_path,
+        provider => shell,
+                
+        before   => [
+          Exec["create syncthing instance ${home_path}"],
+        ]
+      }      
+    }
+
+    exec { "create syncthing instance ${home_path}":
       path     => $::path,
       command  => "sudo -u ${daemon_uid} ${syncthing::binpath} -generate \"${home_path}\"",
       creates  => $instance_config_xml_path,
@@ -86,7 +101,7 @@ define syncthing::instance
       changes => $changes,
 
       require => [
-        Exec["create syncthing instance ${name} home"],
+        Exec["create syncthing instance ${home_path}"],
       ],
 
       notify  => [

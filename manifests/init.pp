@@ -10,6 +10,8 @@ class syncthing
   $devices            = $::syncthing::params::default_devices,
   $folders            = $::syncthing::params::default_folders,
 
+  $create_home_path   = $::syncthing::params::create_home_path,
+
   $daemon_uid         = $::syncthing::params::daemon_uid,
   $daemon_gid         = $::syncthing::params::daemon_gid,
   $daemon_umask       = $::syncthing::params::daemon_umask,
