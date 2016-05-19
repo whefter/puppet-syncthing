@@ -7,19 +7,21 @@ class syncthing::repo {
           include ::apt
 
           ::apt::key { $release_key:
-            ensure     => present,
-            key_source => 'https://syncthing.net/release-key.txt',
+            ensure => present,
+            source => 'https://syncthing.net/release-key.txt',
           }
 
           ::apt::source { 'syncthing':
-            location    => 'http://apt.syncthing.net',
-            release     => 'syncthing',
-            repos       => 'release',
-            include_src => false,
-            require     => Apt::Key[$release_key],
-            before      => [
+            location => 'http://apt.syncthing.net',
+            release  => 'syncthing',
+            repos    => 'release',
+            include  => {
+              'src' => false,
+            },
+            require  => Apt::Key[$release_key],
+            before   => [
               Package[$::syncthing::package_name],
-            ]
+            ],
           }
       }
       default: {
