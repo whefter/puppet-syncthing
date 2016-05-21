@@ -29,12 +29,8 @@
   "issues_url": "https://github.com/whefter/puppet-syncthing/issues",
   "requirements": [
     {
-      "name": "pe",
-      "version_requirement": "3.x"
-    },
-    {
       "name": "puppet",
-      "version_requirement": "3.x"
+      "version_requirement": ">= 3.0.0 < 5.0.0"
     }
   ],
   "source": "https://github.com/whefter/puppet-syncthing.git",
