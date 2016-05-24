@@ -61,10 +61,9 @@ define syncthing::device
         "set device[#attribute/id='${id}']/#attribute/introducer ${introducer}",
       ],
       onlyif => "match device[#attribute/id='${id}'] size == 0",
-      before => Syncthing::Address["${id}:${address}"],
     }
 
-    $options.each | $option, $value | {
+    each($options) | $option, $value | {
       ::syncthing::element { "set device ${id} option ${option} in instance ${home_path}":
         home_path      => $home_path,
         parent_element => 'device',
@@ -77,7 +76,15 @@ define syncthing::device
         ],
       }
     }
-
+    any2array($address).each | $addr | {
+      ::syncthing::address{ "set device ${id} address ${addr} in instance ${home_path}":
+        home_path => $home_path,
+        device_id => $id,
+        address   => $addr,
+        ensure    => $ensure,
+        require   => Augeas["create device ${id} in instance ${home_path}"],
+      }
+    }
   } else {
 
     augeas { "remove device ${id} in instance ${home_path}":
@@ -88,13 +95,6 @@ define syncthing::device
       onlyif => "match device[#attribute/id='${id}'] size > 0",
     }
 
-  }
-
-  ::syncthing::address{ "${id}:${address}":
-    home_path => $home_path,
-    device_id => $id,
-    address   => $address,
-    ensure    => $ensure,
   }
 
 }
