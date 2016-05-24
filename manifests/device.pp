@@ -20,6 +20,10 @@ define syncthing::device
   validate_re($compression, '^(metadata|always|never)$')
   validate_bool($introducer)
 
+  unless empty($options) {
+    warning('DEPRECATION: $options parameter support will be removed in future release. Please use syncthing::address class instead.')
+  }
+
   $instance_config_xml_path = "${home_path}/config.xml"
 
   Augeas {
@@ -58,6 +62,20 @@ define syncthing::device
       ],
       onlyif => "match device[#attribute/id='${id}'] size == 0",
       before => Syncthing::Address["${id}:${address}"],
+    }
+
+    $options.each | $option, $value | {
+      ::syncthing::element { "set device ${id} option ${option} in instance ${home_path}":
+        home_path      => $home_path,
+        parent_element => 'device',
+        parent_id      => $id,
+        element        => $option,
+        value          => $value,
+        require        => [
+          Augeas["update device ${id} in instance ${home_path}"],
+          Augeas["create device ${id} in instance ${home_path}"],
+        ],
+      }
     }
 
   } else {
