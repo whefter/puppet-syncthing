@@ -6,7 +6,7 @@ define syncthing::folder
 
   # Path to the folder
   $path,
-  $label            = '',
+  $label            = $name,
 
   $ensure           = 'present',
 
