@@ -5,12 +5,12 @@ define syncthing::install_binary
   $user,
   $group,
 ) {
-  $kernel = downcase($facts['kernel']) ? {
+  $kernel = downcase($::kernel) ? {
     'linux' => 'linux',
     default => 'linux',
   }
   # $facts['os']['architecture']
-  $architecture = downcase($facts['architecture']) ? {
+  $architecture = downcase($::architecture) ? {
     'amd64'  => 'amd64',
     'x86_64' => 'amd64',
     'x86'    => '386',
