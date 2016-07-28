@@ -1,6 +1,6 @@
 {
   "name": "whefter-syncthing",
-  "version": "0.3.1",
+  "version": "1.0.0-beta1",
   "author": "William Hefter",
   "dependencies": [
     {"name":"puppetlabs/stdlib","version_requirement":">= 4.5.0 < 5.0.0"},
@@ -31,7 +31,7 @@
   "requirements": [
     {
       "name": "puppet",
-      "version_requirement": ">= 3.0.0 < 5.0.0"
+      "version_requirement": ">= 4.0.0 < 5.0.0"
     }
   ],
   "source": "https://github.com/whefter/puppet-syncthing.git",
