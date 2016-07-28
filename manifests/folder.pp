@@ -3,6 +3,7 @@ define syncthing::folder
   # Path to the config.xml file that should be edited. This serves
   # to identify the instance.
   $home_path,
+  $instance_name,
 
   # Path to the folder
   $path,
@@ -41,7 +42,8 @@ define syncthing::folder
     changes => $changes,
 
     notify  => [
-      Service['syncthing'],
+#      Service["syncthing ${instance_name}"],
+        Exec["restart syncthing instance ${instance_name}"],
     ],
 
     require => [

@@ -1,6 +1,7 @@
 define syncthing::folder_device
 (
   $home_path,
+  $instance_name,
 
   $folder_id,
   $device_id,
@@ -27,7 +28,8 @@ define syncthing::folder_device
     changes => $changes,
 
     notify  => [
-      Service['syncthing'],
+#      Service["syncthing ${instance_name}"],
+        Exec["restart syncthing instance ${instance_name}"],
     ],
 
     require => [

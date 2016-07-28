@@ -2,7 +2,7 @@ class syncthing::params {
   $binpath                = '/usr/bin/syncthing'
   $instancespath          = '/etc/syncthing'
 
-  $version                = 'latest'
+  $package_version        = 'latest'
 
   $manage_repo            = true
   $package_name           = 'syncthing'
