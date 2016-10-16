@@ -1,6 +1,12 @@
 #syncthing
 [![Build Status](https://travis-ci.org/whefter/puppet-syncthing.png)](https://travis-ci.org/whefter/puppet-syncthing)
 
+**Version 1.0.0 has a (small) number of incompatible changes, most notably:**
+
+* The `version` parameter has been renamed to `package_version` to reflect that this will only affact the version of the package installed, not of binaries.
+* Almost all defined types relevant to instance configuration now require `instance_name` in addition to `home_path`.
+* On the plus side, it is now possible to create what I like to call "binary" instances that install a defined version of the syncthing binary. See the `binary_version` parameter for more details.
+
 ####Table of Contents
 
 1. [Overview](#overview)
