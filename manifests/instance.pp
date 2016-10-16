@@ -113,12 +113,15 @@ define syncthing::instance
     }
 
     exec { "create syncthing instance ${home_path}":
-      path     => $::path,
-      command  => "sudo -u ${daemon_uid} ${syncthing::binpath} -generate \"${home_path}\"",
-      creates  => $instance_config_xml_path,
-      provider => shell,
+      path        => $::path,
+      command     => "${syncthing::binpath} -generate \"${home_path}\"",
+      environment => [ 'STNODEFAULTFOLDER=1', 'HOME=$HOME' ],
+      user        => $daemon_uid,
+      group       => $daemon_gid,
+      creates     => $instance_config_xml_path,
+      provider    => shell,
 
-      notify   => [
+      notify      => [
 #        Service["syncthing ${name}"],
         Exec["restart syncthing instance ${name}"],
       ],
