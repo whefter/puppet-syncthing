@@ -298,11 +298,27 @@ Providing this and `gui_password` enables user authentication.
 
 #####`gui_password`
 
-Password to use to authenticate for the GUI. Password is encrypted with BCrypt, provided a salt (not checked for validity) is passed to `gui_password_salt`.
+Password to use to authenticate for the GUI.
+
+If a salt string is provided through the `gui_password_salt` parameter (see below), then the value passed to `gui_password` is assumed to be the plaintext password and will be hashed with BCrypt prior to being inserted into the configuration file, using `gui_password_salt` as salt.
+
+If `gui_password_salt` is not provided, the value passed to `gui_password` will be inserted as-is into the configuration file. This way, a BCrypt hash can be provided directly so as not to have plaintext passwords in the Puppet/Hiera files.
+
+One method to hash a password with a random salt to obtain a hash for that password for direct insertion is (requires the `bcrypt` gem):
+
+```ruby
+ruby -e "require 'bcrypt'; puts BCrypt::Engine.hash_secret('<<<PASSWORD>>>', BCrypt::Engine.generate_salt);"`
+```
 
 #####`gui_password_salt`
 
-When specifying a password, this must be set to a valid BCrypt salt such as `$2a$10$vI8aWBnW3fID.ZQ4/zo1G.`
+This must be set to a valid BCrypt salt such as `$2a$10$vI8aWBnW3fID.ZQ4/zo1G.` when providing plaintext passwords for hashing through this module.
+
+One method to generate hashes is (requires the `brypt` gem):
+
+```ruby
+ruby -e "require 'bcrypt'; salt = BCrypt::Engine.generate_salt; puts salt;"
+```
 
 > Setting this parameter will result in the module attempting to generate a BCrypt-encrypted password. This requires the `bcrypt` gem to be installed on the puppetmaster.
 
