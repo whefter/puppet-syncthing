@@ -1,7 +1,7 @@
 ---
  - 'set device[#attribute/id="<%= @id %>"]/#attribute/id <%= @id %>'
  - 'set device[#attribute/id="<%= @id %>"]/#attribute/name <%= @device_name %>'
- - 'set device[#attribute/id="<%= @id %>"]/#attribute/compression <%- if @compression -%>true<%- else -%>false<%- end -%>'
+ - 'set device[#attribute/id="<%= @id %>"]/#attribute/compression <%- if (@compression =~ /always/ or @compression =~/metadata/)-%><%= @compression%><%- else -%>false<%- end -%>'
  - 'set device[#attribute/id="<%= @id %>"]/#attribute/introducer <%- if @introducer -%>true<%- else -%>false<%- end -%>'
  - 'set device[#attribute/id="<%= @id %>"]/address/#text <%= @address %>'
 <%- @options.each do |key, value|
