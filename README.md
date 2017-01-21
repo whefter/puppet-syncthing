@@ -54,17 +54,17 @@ class { '::syncthing':
   instances => {
     'example' => {
       home_path   => '/home/synctester/example_instance',
-      daemon_uid  => 'synctest', // Default: root
-      daemon_gid  => 'synctester', // Default: root
+      daemon_uid  => 'synctest', # Default: root
+      daemon_gid  => 'synctester', # Default: root
 
-      // Variables for standard parameters
+      # Variables for standard parameters
       gui_tls     => true,
-      gui_address => '0.0.0.0', // (Default)
-      gui_port    => '8888', // Default: 8080
+      gui_address => '0.0.0.0', # (Default)
+      gui_port    => '8888', # Default: 8080
 
-      // Override or set arbitrary options
+      # Override or set arbitrary options
       options     => {
-        'listenAddress' => '0.0.0.0:19000',
+        'listenAddress' => 'tcp4://0.0.0.0:19000',
         'startBrowser'  => 'false',
       },
     }
