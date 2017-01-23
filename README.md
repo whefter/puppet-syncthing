@@ -395,6 +395,8 @@ Direct declarations of this type are possible, but discouraged outside of progra
   instance_name => 'instance1',
   id            => 'backupfolder1',
   path          => '/home/syncuser/myfiles',
+  type          => 'readonly' #readwrite by default
+  autoNormalize => 'true' #false by default
   options       => {
     # Override options here
   },
@@ -426,9 +428,9 @@ The ID for the folder. Defaults to the `name` parameter.
 
 Path to the folder that should be synced.
 
-#####`ro`
+#####`type`
 
-Value to set for the `ro` option for this folder. Can be `true` or `false`, defaults to `false`.
+Value to set for the `type` option for this folder. Can be `readonly` or `readwrite`, defaults to `readwrite`.
 
 #####`rescanIntervalS`
 
@@ -437,6 +439,10 @@ Value to set for the `rescanIntervalS` option for this device. Defaults to `60`.
 #####`ignorePerms`
 
 Value to set for the `ignorePerms` option for this device. Can be `true` or `false`, defaults to `false`.
+
+#####`autoNormalize`
+
+Value to set for the `autoNormalize` option for this device. Default to `false`.
 
 #####`options`
 

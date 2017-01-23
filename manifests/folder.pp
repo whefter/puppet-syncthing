@@ -13,9 +13,10 @@ define syncthing::folder
 
   $id               = $name,
 
-  $ro               = false,
+  $type             = 'readwrite',
   $rescanIntervalS  = '60',
   $ignorePerms      = false,
+  $autoNormalize    = false,
 
   $options          = {},
 
