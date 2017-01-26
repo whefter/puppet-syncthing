@@ -61,11 +61,15 @@ class { '::syncthing':
       gui_tls     => true,
       gui_address => '0.0.0.0', # (Default)
       gui_port    => '8888', # Default: 8080
+      
+      defaultGlobalAnnounceServer => 'false', # if wanted, default : true
 
       # Override or set arbitrary options
       options     => {
-        'listenAddress' => 'tcp4://0.0.0.0:19000',
-        'startBrowser'  => 'false',
+        'listenAddress'         => 'tcp4://0.0.0.0:19000',
+        'startBrowser'          => 'false',
+        'globalAnnounceServer'  => $announce_node, # if defaults are disabled, you need to specify at least one
+        'globalAnnounceServer2' => $announce_node2, # if you wants several announce nodes, add them this way
       },
     }
   }
@@ -193,6 +197,10 @@ Override the default value passed to `syncthing::instance`for `gui_password_salt
 #####`gui_options`
 
 Override the default value passed to `syncthing::instance`for `gui_options`.
+
+#####`defaultGlobalAnnounceServer`
+
+Override the default value passed to `syncthing::instance` for `defaultGlobalAnnounceServer`.
 
 #####`instance_options`
 
@@ -325,6 +333,10 @@ ruby -e "require 'bcrypt'; salt = BCrypt::Engine.generate_salt; puts salt;"
 #####`gui_options`
 
 Set or override arbitrary GUI options. Created as XML nodes in the `<gui></gui>` element.
+
+#####`defaultGlobalAnnounceServer`
+
+Enable or disable the default GlobalAnnounceServer. (Use it you have your own instance of stdiscosrv)
 
 #####`options`
 

@@ -136,6 +136,19 @@ define syncthing::instance
     $changes = parseyaml( template('syncthing/config-changes.yaml.erb') )
     #notify { 'debug': message => $changes }
 
+     if $defaultGlobalAnnounceServer == 'false' {
+      augeas { "syncthing ${name} basic config without default announce server":
+        incl    => $instance_config_xml_path,
+        lens    => 'Xml.lns',
+        context => "/files${instance_config_xml_path}/configuration",
+        changes => [
+            "rm options/globalAnnounceServer",
+        ],
+        before => Augeas["syncthing ${name} basic config"],
+        require => Exec["create syncthing instance ${home_path}"],
+      }
+    }
+    
     augeas { "syncthing ${name} basic config":
       incl    => $instance_config_xml_path,
       lens    => 'Xml.lns',
