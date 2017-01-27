@@ -29,7 +29,7 @@ class syncthing::params {
   $gui_password_salt           = undef
   $gui_options                 = {}
 
-  $defaultGlobalAnnounceServer = $::syncthing::params::defaultGlobalAnnounceServer
+  $defaultGlobalAnnounceServer = true
 
   $instance_options            = {}
 
