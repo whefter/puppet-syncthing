@@ -61,6 +61,7 @@ class { '::syncthing':
       gui_tls     => true,
       gui_address => '0.0.0.0', # (Default)
       gui_port    => '8888', # Default: 8080
+
       
       defaultGlobalAnnounceServer => 'false', # if wanted, default : true
 
