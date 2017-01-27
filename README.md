@@ -62,10 +62,15 @@ class { '::syncthing':
       gui_address => '0.0.0.0', # (Default)
       gui_port    => '8888', # Default: 8080
 
+      
+      defaultGlobalAnnounceServer => 'false', # if wanted, default : true
+
       # Override or set arbitrary options
       options     => {
-        'listenAddress' => 'tcp4://0.0.0.0:19000',
-        'startBrowser'  => 'false',
+        'listenAddress'         => 'tcp4://0.0.0.0:19000',
+        'startBrowser'          => 'false',
+        'globalAnnounceServer'  => $announce_node, # if defaults are disabled, you need to specify at least one
+        'globalAnnounceServer2' => $announce_node2, # if you wants several announce nodes, add them this way
       },
     }
   }
@@ -193,6 +198,10 @@ Override the default value passed to `syncthing::instance`for `gui_password_salt
 #####`gui_options`
 
 Override the default value passed to `syncthing::instance`for `gui_options`.
+
+#####`defaultGlobalAnnounceServer`
+
+Override the default value passed to `syncthing::instance` for `defaultGlobalAnnounceServer`.
 
 #####`instance_options`
 
@@ -326,6 +335,10 @@ ruby -e "require 'bcrypt'; salt = BCrypt::Engine.generate_salt; puts salt;"
 
 Set or override arbitrary GUI options. Created as XML nodes in the `<gui></gui>` element.
 
+#####`defaultGlobalAnnounceServer`
+
+Enable or disable the default GlobalAnnounceServer. (Use it you have your own instance of stdiscosrv)
+
 #####`options`
 
 Set or override arbitrary options. Created as XML nodes in the `<options></options>` element.
@@ -395,6 +408,8 @@ Direct declarations of this type are possible, but discouraged outside of progra
   instance_name => 'instance1',
   id            => 'backupfolder1',
   path          => '/home/syncuser/myfiles',
+  type          => 'readonly' #readwrite by default
+  autoNormalize => 'true' #false by default
   options       => {
     # Override options here
   },
@@ -426,9 +441,9 @@ The ID for the folder. Defaults to the `name` parameter.
 
 Path to the folder that should be synced.
 
-#####`ro`
+#####`type`
 
-Value to set for the `ro` option for this folder. Can be `true` or `false`, defaults to `false`.
+Value to set for the `type` option for this folder. Can be `readonly` or `readwrite`, defaults to `readwrite`.
 
 #####`rescanIntervalS`
 
@@ -437,6 +452,10 @@ Value to set for the `rescanIntervalS` option for this device. Defaults to `60`.
 #####`ignorePerms`
 
 Value to set for the `ignorePerms` option for this device. Can be `true` or `false`, defaults to `false`.
+
+#####`autoNormalize`
+
+Value to set for the `autoNormalize` option for this device. Default to `false`.
 
 #####`options`
 
