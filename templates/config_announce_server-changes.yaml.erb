@@ -1,0 +1,6 @@
+---
+<%- @options.each do |key, value| -%>
+<%- if value and key =~ /^globalAnnounceServer\d/ -%>
+ - 'ins globalAnnounceServer before options/globalAnnounceEnabled'
+ - 'set options/globalAnnounceServer[last()]/#text <%= value %>'
+<%- end    end -%>

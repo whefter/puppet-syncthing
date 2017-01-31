@@ -151,6 +151,18 @@ define syncthing::instance
         Exec["restart syncthing instance ${name}"],
       ],
     }
+    if ($options =~ /globalAnnounceServer\d/) {
+        $changes_announce_server = parseyaml( template('syncthing/config_announce_server-changes.yaml.erb') )
+        augeas {"add custom globalAnnounceServer":
+            incl    => $instance_config_xml_path,
+            lens    => 'Xml.lns',
+            context => "/files${instance_config_xml_path}/configuration",
+            changes => $changes_announce_server,
+            notify  => Service['syncthing'],
+            require => Augeas["syncthing ${name} basic config"],
+            onlyif  => "match options/globalAnnounceServer size == 1", 
+        }    
+    }
     
     each($devices) |$device_name, $device_parameters| {
       create_resources(::syncthing::device, { "instance ${name} device ${device_name}" => $device_parameters }, {

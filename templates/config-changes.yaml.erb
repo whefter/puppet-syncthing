@@ -13,17 +13,20 @@
 <%- elsif @gui_password -%>
  - 'set gui/password/#text <%= @gui_password %>'
 <%- end -%>
-<%- @gui_options.each do |key, value|
-        if value -%>
+<%- @gui_options.each do |key, value| if value -%>
  - 'set gui/<%= key %>/#text <%= value %>'
     <%- else -%>
  - 'rm gui/<%= key %>' 
-<%-     end
-    end -%>
-<%- @options.each do |key, value|
-        if value -%>
+<%- end  end -%>
+<%- @options.each do |key, value| -%>
+<%- if key !~ /globalAnnounceServer/ and value -%>
  - 'set options/<%= key %>/#text <%= value %>'
-    <%- else -%>
+<%- elsif key !~ /globalAnnounceServer/-%> 
  - 'rm options/<%= key %>'
-<%-     end
-    end -%>
+<%- elsif key == 'globalAnnounceServer' and value -%>
+ - 'set options/globalAnnounceServer/#text <%= value %>'
+<%- elsif key == 'globalAnnounceServer'-%>
+ - 'rm options/<%= key %>'
+<%- else -%>
+ - 'rm options/<%= key %>'
+<%- end    end -%>
