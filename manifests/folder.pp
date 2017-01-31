@@ -8,7 +8,7 @@ define syncthing::folder
   $path,
   $label            = $name,
 
-  $ensure           = 'absent',
+  $ensure           = 'present',
 
   $id               = $name,
 
