@@ -405,7 +405,7 @@ Direct declarations of this type are possible, but discouraged outside of progra
     'versioning_cleanoutDays' => '10',
     # for simple versioning
     'versioning'     => 'simple',
-    'versioning_keep => '5',
+    'versioning_keep' => '5',
     # for staggered versioning
     'versioning'               => 'staggered',
     'versioning_maxAge'        => '864000',
