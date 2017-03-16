@@ -7,17 +7,50 @@
  - 'set folder[#attribute/id="<%= @id %>"]/#attribute/ignorePerms <%= @ignorePerms %>'
  - 'set folder[#attribute/id="<%= @id %>"]/#attribute/autoNormalize <%= @autoNormalize %>'
 
-<%- @devices.each do |dev_id, dev_ensure|
-        if dev_ensure == 'present' -%>
+<%- @devices.each do |dev_id, dev_ensure| -%>
+<%- if dev_ensure == 'present' -%>
  - 'set folder[#attribute/id="<%= @id %>"]/device[#attribute/id="<%= dev_id %>"]/#attribute/id <%= dev_id %>'
-    <%- else -%>
+<%- else -%>
  - 'rm folder[#attribute/id="<%= @id %>"]/device[#attribute/id="<%= dev_id %>"]'
-<%-     end
-    end -%>
-<%- @options.each do |key, value|
-        if value -%>
+<%- end end -%>
+
+<%- if @options != '' -%>
+
+<%- @options.each do |key, value| -%>
+<%- if value and key !~ /versioning/ -%>
  - 'set folder[#attribute/id="<%= @id %>"]/<%= key %>/#text <%= value %>'
-    <%- else -%>
+<%- elsif key !~ /versioning/-%>
  - 'rm folder[#attribute/id="<%= @id %>"]/<%= key %>'
-<%-     end
-    end -%>
+<%- end end -%>
+
+<%- @options.each do |key, value| -%>
+<%- if key == 'versioning' and value == 'staggered'-%>
+ - 'set folder[#attribute/id="<%= @id %>"]/<%= key %>/#attribute/type <%= value %>'
+<%- elsif key =~ /maxAge/ and value -%>
+ - 'set folder[#attribute/id="<%= @id %>"]/versioning/param[1]/#attribute/key maxAge'
+ - 'set folder[#attribute/id="<%= @id %>"]/versioning/param[1]/#attribute/val <%= value %>'
+<%- elsif key =~ /cleanInterval/ and value -%>
+ - 'set folder[#attribute/id="<%= @id %>"]/versioning/param[2]/#attribute/key cleanInterval'
+ - 'set folder[#attribute/id="<%= @id %>"]/versioning/param[2]/#attribute/val <%= value %>'
+<%- elsif key =~ /versionsPath/ -%>
+ - 'set folder[#attribute/id="<%= @id %>"]/versioning/param[3]/#attribute/key versionsPath'
+ - 'set folder[#attribute/id="<%= @id %>"]/versioning/param[3]/#attribute/val ""'
+<%- end -%>
+<%- if key == 'versioning' and value == 'trashcan'-%>
+ - 'set folder[#attribute/id="<%= @id %>"]/<%= key %>[/#attribute/type="<%= value %>"]/#attribute/type <%= value %>'
+<%- elsif key =~ /cleanoutDays/ and value -%>
+ - 'set folder[#attribute/id="<%= @id %>"]/versioning/param[1]/#attribute/key cleanoutDays'
+ - 'set folder[#attribute/id="<%= @id %>"]/versioning/param[1]/#attribute/val <%= value %>'
+<%- end -%>
+<%- if key == 'versioning' and value == 'simple'-%>
+ - 'set folder[#attribute/id="<%= @id %>"]/<%= key %>[/#attribute/type="<%= value %>"]/#attribute/type <%= value %>'
+<%- elsif key =~ /keep/ and value -%>
+ - 'set folder[#attribute/id="<%= @id %>"]/versioning/param[1]/#attribute/key keep'
+ - 'set folder[#attribute/id="<%= @id %>"]/versioning/param[1]/#attribute/val <%= value %>'
+<%- end -%>
+<%- if key == 'versioning' and value == 'external'-%>
+ - 'set folder[#attribute/id="<%= @id %>"]/<%= key %>[/#attribute/type="<%= value %>"]/#attribute/type <%= value %>'
+<%- elsif key =~ /command/ and value -%>
+ - 'set folder[#attribute/id="<%= @id %>"]/versioning/param[1]/#attribute/key command'
+ - 'set folder[#attribute/id="<%= @id %>"]/versioning/param[1]/#attribute/val <%= value.sub(/(\/*\Z)/, '/') %>'
+<%- end end end -%>

@@ -400,6 +400,19 @@ Direct declarations of this type are possible, but discouraged outside of progra
   path          => '/home/syncuser/myfiles',
   options       => {
     # Override options here
+    # for trashcan versioning :
+    'versioning'              => 'trashcan',
+    'versioning_cleanoutDays' => '10',
+    # for simple versioning
+    'versioning'     => 'simple',
+    'versioning_keep' => '5',
+    # for staggered versioning
+    'versioning'               => 'staggered',
+    'versioning_maxAge'        => '864000',
+    'versioning_cleanInterval' => '3600',
+    #for external versioning
+    'versioning'         => 'external',
+    'versioning_command' => 'cmd',      
   },
   devices       => {
     '523LMDC-KKQPKVU-JBPGYQU-IAGHP5B-TU38GN4-G7CEEHG-OOL32IR-YWQSFAX' => 'present',
