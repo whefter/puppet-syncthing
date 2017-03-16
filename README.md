@@ -66,6 +66,9 @@ class { '::syncthing':
       options     => {
         'listenAddress' => 'tcp4://0.0.0.0:19000',
         'startBrowser'  => 'false',
+        'globalAnnounceServer'  => '', # disable defaults globalAnnounceServers
+        'globalAnnounceServer'  => $announce_node, # add your private this way
+        'globalAnnounceServer2' => $announce_node2, # add a second this way
       },
     }
   }
@@ -426,9 +429,9 @@ The ID for the folder. Defaults to the `name` parameter.
 
 Path to the folder that should be synced.
 
-#####`ro`
+#####`type`
 
-Value to set for the `ro` option for this folder. Can be `true` or `false`, defaults to `false`.
+Value to set for the folder type. Can be `readwrite` or `readonly`, defaults to `readwrite`.
 
 #####`rescanIntervalS`
 
@@ -437,6 +440,11 @@ Value to set for the `rescanIntervalS` option for this device. Defaults to `60`.
 #####`ignorePerms`
 
 Value to set for the `ignorePerms` option for this device. Can be `true` or `false`, defaults to `false`.
+
+#####`autoNormalize`
+
+Value to set for the `autoNormalize` option for this device. Can be `true` or `false`, defaults to `false`.
+
 
 #####`options`
 
