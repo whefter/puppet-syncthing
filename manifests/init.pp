@@ -2,13 +2,15 @@ class syncthing
 (
   $binpath            = $::syncthing::params::binpath,
   $instancespath      = $::syncthing::params::instancespath,
-  $version            = $::syncthing::params::version,
+  $package_version    = $::syncthing::params::package_version,
   $manage_repo        = $::syncthing::params::manage_repo,
   $package_name       = $::syncthing::params::package_name,
 
   $instances          = $::syncthing::params::default_instances,
   $devices            = $::syncthing::params::default_devices,
   $folders            = $::syncthing::params::default_folders,
+
+  $create_home_path   = $::syncthing::params::create_home_path,
 
   $daemon_uid         = $::syncthing::params::daemon_uid,
   $daemon_gid         = $::syncthing::params::daemon_gid,
@@ -32,7 +34,7 @@ class syncthing
 inherits ::syncthing::params
 {
   class { '::syncthing::repo': } ->
-  class { '::syncthing::install': } ->
+  class { '::syncthing::install_package': } ->
   class { '::syncthing::service': }
 
   create_resources( ::syncthing::instance,  $instances )

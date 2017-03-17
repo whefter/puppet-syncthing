@@ -1,6 +1,12 @@
 #syncthing
 [![Build Status](https://travis-ci.org/whefter/puppet-syncthing.png)](https://travis-ci.org/whefter/puppet-syncthing)
 
+**Version 1.0.0 has a (small) number of incompatible changes, most notably:**
+
+* The `version` parameter has been renamed to `package_version` to reflect that this will only affact the version of the package installed, not of binaries.
+* Almost all defined types relevant to instance configuration now require `instance_name` in addition to `home_path`.
+* On the plus side, it is now possible to create what I like to call "binary" instances that install a defined version of the syncthing binary. See the `binary_version` parameter for more details.
+
 ####Table of Contents
 
 1. [Overview](#overview)
@@ -48,18 +54,21 @@ class { '::syncthing':
   instances => {
     'example' => {
       home_path   => '/home/synctester/example_instance',
-      daemon_uid  => 'synctest', // Default: root
-      daemon_gid  => 'synctester', // Default: root
+      daemon_uid  => 'synctest', # Default: root
+      daemon_gid  => 'synctester', # Default: root
 
-      // Variables for standard parameters
+      # Variables for standard parameters
       gui_tls     => true,
-      gui_address => '0.0.0.0', // (Default)
-      gui_port    => '8888', // Default: 8080
+      gui_address => '0.0.0.0', # (Default)
+      gui_port    => '8888', # Default: 8080
 
-      // Override or set arbitrary options
+      # Override or set arbitrary options
       options     => {
-        'listenAddress' => '0.0.0.0:19000',
+        'listenAddress' => 'tcp4://0.0.0.0:19000',
         'startBrowser'  => 'false',
+        'globalAnnounceServer'  => '', # disable defaults globalAnnounceServers
+        'globalAnnounceServer'  => $announce_node, # add your private this way
+        'globalAnnounceServer2' => $announce_node2, # add a second this way
       },
     }
   }
@@ -100,11 +109,7 @@ Override the assumed path to store downloaded and extracted Syncthing releases i
 
 Override the assumed value to the Syncthing instances configuration files. Defaults to `/etc/syncthing`.
 
-#####`architecture`
-
-Override the architecture parameter determined via Facter. Used in determining the download URL for Syncthing.
-
-#####`version`
+#####`package_version`
 
 Override the value used for the installation. Defaults to `latest`, in which case new releases will be downloaded when they are publishing on the Syncthing Github page. Note that Syncthing also has an auto-update mechanism.
 
@@ -118,10 +123,6 @@ Set it to `false` to control package installation using your internal / personal
 The name of the package that will be used for syncthing installation. Defaults to `syncthing`.
 Nice option for those we built their own packages.
 
-#####`kernel`
-
-Override the kernel parameter determined via Facter. Used in determining the download URL for Syncthing.
-
 #####`instances`
 
 Hash that will be used to declare `syncthing::instance` resources.
@@ -133,6 +134,10 @@ Hash that will be used to declare `syncthing::folder` resources.
 #####`devices`
 
 Hash that will be used to declare `syncthing::device` resources.
+
+#####`create_home_path`
+
+Override the default value passed to `syncthing::instance`for `create_home_path`.
 
 #####`daemon_uid`
 
@@ -230,6 +235,27 @@ Specify whether the instance configuration file is present or absent. Defaults t
 
 The home path for this instance. Where the configuration file and all certificates are stored. Mandatory parameter, will be created by Syncthing if not present.
 
+#####`create_home_path`
+
+Attempt to recursively create the passed home path prior to calling Syncthing to generate the configuration/certificates. This will be
+called in the context of the user identified by `daemon_uid`.
+
+#####`binary`
+
+Sets this instance to be a "binary instance", meaning it will download a Syncthing binary to the path specified by `binary_path` and use that binary instead of the package-provided binary.
+
+#####`binary_path`
+
+If `binary` is set to `true`, the Syncthing binary will be downloaded to this path.
+
+#####`binary_version`
+
+The Syncthing version to get when downloading a Syncthing binary. Defaults to `latest`.
+
+**Note that once a binary has been downloaded, this parameter becomes ineffective due to the fact that only the existance of a binary is checked, not the version.**
+
+**This has the advantage that a binary instance, once created, can be upgraded independently from other instances, in constrast with "package instances", which all share the package binary and get upgraded/restarted when the package is upgraded.**
+
 #####`daemon_uid`
 
 The UID to run the daemon for this instance as.
@@ -275,11 +301,27 @@ Providing this and `gui_password` enables user authentication.
 
 #####`gui_password`
 
-Password to use to authenticate for the GUI. Password is encrypted with BCrypt, provided a salt (not checked for validity) is passed to `gui_password_salt`.
+Password to use to authenticate for the GUI.
+
+If a salt string is provided through the `gui_password_salt` parameter (see below), then the value passed to `gui_password` is assumed to be the plaintext password and will be hashed with BCrypt prior to being inserted into the configuration file, using `gui_password_salt` as salt.
+
+If `gui_password_salt` is not provided, the value passed to `gui_password` will be inserted as-is into the configuration file. This way, a BCrypt hash can be provided directly so as not to have plaintext passwords in the Puppet/Hiera files.
+
+One method to hash a password with a random salt to obtain a hash for that password for direct insertion is (requires the `bcrypt` gem):
+
+```ruby
+ruby -e "require 'bcrypt'; puts BCrypt::Engine.hash_secret('<<<PASSWORD>>>', BCrypt::Engine.generate_salt);"`
+```
 
 #####`gui_password_salt`
 
-When specifying a password, this must be set to a valid BCrypt salt such as `$2a$10$vI8aWBnW3fID.ZQ4/zo1G.`
+This must be set to a valid BCrypt salt such as `$2a$10$vI8aWBnW3fID.ZQ4/zo1G.` when providing plaintext passwords for hashing through this module.
+
+One method to generate hashes is (requires the `brypt` gem):
+
+```ruby
+ruby -e "require 'bcrypt'; salt = BCrypt::Engine.generate_salt; puts salt;"
+```
 
 > Setting this parameter will result in the module attempting to generate a BCrypt-encrypted password. This requires the `bcrypt` gem to be installed on the puppetmaster.
 
@@ -295,11 +337,14 @@ Set or override arbitrary options. Created as XML nodes in the `<options></optio
 
 Adds a `<device>` entry to the configuration file for the instance associated with the passed home path.
 
+Direct declarations of this type are possible, but discouraged outside of programatical declarations due to its cumbersome options. Defining devices through the `devices` parameter of the `syncthing::instance` class is much more practical in any manual definition scenario.
+
 ```puppet
   ::syncthing::device { 'laptop':
-    home_path   => '/etc/backup/instance1',
-    id          => '523LMDC-KKQPKVU-JBPGYQU-IAGHP5B-TU38GN4-G7CEEHG-OOL32IR-YWQSFAX',
-    compression => true,
+    home_path     => '/etc/backup/instance1',
+    instance_name => 'instance1',
+    id            => '523LMDC-KKQPKVU-JBPGYQU-IAGHP5B-TU38GN4-G7CEEHG-OOL32IR-YWQSFAX',
+    compression   => true,
   }
 ```
 
@@ -312,6 +357,10 @@ Specify whether the device configuration is present or absent. Defaults to 'pres
 #####`home_path`
 
 The home path for the instance that should be told about this device. Mandatory parameter.
+
+#####`instance_name`
+
+The name of the instance that should be told about this device, as passed to the `instances` parameter on the `syncthing` class. Mandatory parameter.
 
 #####`id`
 
@@ -341,15 +390,31 @@ Set or override arbitrary options. Created as XML nodes in the `<device></device
 
 Adds a `<folder>` entry to the configuration file for the instance associated with the passed home path.
 
+Direct declarations of this type are possible, but discouraged outside of programatical declarations due to its cumbersome options. Defining folders through the `folders` parameter of the `syncthing::instance` class is much more practical in any manual definition scenario.
+
 ```puppet
 ::syncthing::folder { 'laptop':
-  home_path => '/etc/backup/instance1',
-  id        => 'backupfolder1',
-  path      => '/home/syncuser/myfiles',
-  options   => {
+  home_path     => '/etc/backup/instance1',
+  instance_name => 'instance1',
+  id            => 'backupfolder1',
+  path          => '/home/syncuser/myfiles',
+  options       => {
     # Override options here
+    # for trashcan versioning :
+    'versioning'              => 'trashcan',
+    'versioning_cleanoutDays' => '10',
+    # for simple versioning
+    'versioning'     => 'simple',
+    'versioning_keep' => '5',
+    # for staggered versioning
+    'versioning'               => 'staggered',
+    'versioning_maxAge'        => '864000',
+    'versioning_cleanInterval' => '3600',
+    #for external versioning
+    'versioning'         => 'external',
+    'versioning_command' => 'cmd',      
   },
-  devices   => {
+  devices       => {
     '523LMDC-KKQPKVU-JBPGYQU-IAGHP5B-TU38GN4-G7CEEHG-OOL32IR-YWQSFAX' => 'present',
   }
 }
@@ -365,6 +430,10 @@ Specify whether the device configuration is present or absent. Defaults to 'pres
 
 The home path for the instance that should be told about this folder. Mandatory parameter.
 
+#####`instance_name`
+
+The name of the instance that should be told about this device, as passed to the `instances` parameter on the `syncthing` class. Mandatory parameter.
+
 #####`id`
 
 The ID for the folder. Defaults to the `name` parameter.
@@ -373,9 +442,9 @@ The ID for the folder. Defaults to the `name` parameter.
 
 Path to the folder that should be synced.
 
-#####`ro`
+#####`type`
 
-Value to set for the `ro` option for this folder. Can be `true` or `false`, defaults to `false`.
+Value to set for the folder type. Can be `readwrite` or `readonly`, defaults to `readwrite`.
 
 #####`rescanIntervalS`
 
@@ -384,6 +453,11 @@ Value to set for the `rescanIntervalS` option for this device. Defaults to `60`.
 #####`ignorePerms`
 
 Value to set for the `ignorePerms` option for this device. Can be `true` or `false`, defaults to `false`.
+
+#####`autoNormalize`
+
+Value to set for the `autoNormalize` option for this device. Can be `true` or `false`, defaults to `false`.
+
 
 #####`options`
 
@@ -409,10 +483,11 @@ A hash of devices to enable for the folder. Invididual device IDs can be specifi
 Adds a `<device>` entry for the specified folder.
 
 ```puppet
-::syncthing::folder { 'laptop_on_backupfolder1':
-  home_path => '/etc/backup/instance1',
-  folder_id => 'backupfolder1',
-  device_id => '523LMDC-KKQPKVU-JBPGYQU-IAGHP5B-TU38GN4-G7CEEHG-OOL32IR-YWQSFAX',
+::syncthing::folder { 'backupfolder1_on_laptop':
+  home_path     => '/etc/backup/instance1',
+  instance_name => 'instance1',
+  folder_id     => 'backupfolder1',
+  device_id     => '523LMDC-KKQPKVU-JBPGYQU-IAGHP5B-TU38GN4-G7CEEHG-OOL32IR-YWQSFAX',
 }
 ```
 
@@ -425,6 +500,10 @@ Specify whether the device entry is present or absent. Defaults to 'present'. Va
 #####`home_path`
 
 The home path for the instance that should be told about this device. Mandatory parameter.
+
+#####`instance_name`
+
+The name of the instance that should be told about this device, as passed to the `instances` parameter on the `syncthing` class. Mandatory parameter.
 
 #####`folder_id`
 
@@ -444,8 +523,10 @@ The ID of the device.
 
 ####Private Classes
 
-* `syncthing::install`: Installs the Syncthing package or binaries.
-* `syncthing::service`: Installs and runs the Syncthing init.d daemon.
+* `syncthing::install_package`: Installs the Syncthing package.
+* `syncthing::install_binary`: Downloads a Syncthing binary.
+* `syncthing::service`: Installs the Syncthing init.d daemon.
+* `syncthing::instance_service`: Provides commands that emulate service start/stop/restart for binary Syncthing instances.
 * `syncthing::params`: Manages Syncthing parameters.
 
 ###Defined Types
@@ -461,4 +542,4 @@ The ID of the device.
 
 ###Operating system support
 
-Currently, only Debian and Ubuntu are supported. Debian has been tested more extensively. This limitation is currently due to the limited availability of packages.
+Currently, only Debian and Ubuntu are supported. Debian has been tested more extensively. Contributions adding support for further OSes are welcome!

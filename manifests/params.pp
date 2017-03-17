@@ -2,7 +2,7 @@ class syncthing::params {
   $binpath                = '/usr/bin/syncthing'
   $instancespath          = '/etc/syncthing'
 
-  $version                = 'latest'
+  $package_version        = 'latest'
 
   $manage_repo            = true
   $package_name           = 'syncthing'
@@ -10,6 +10,8 @@ class syncthing::params {
   $default_instances      = {}
   $default_devices        = {}
   $default_folders        = {}
+
+  $create_home_path       = false
 
   $daemon_uid             = 'root'
   $daemon_gid             = 'root'

@@ -1,6 +1,6 @@
 {
   "name": "whefter-syncthing",
-  "version": "0.2.8",
+  "version": "1.0.0",
   "author": "William Hefter",
   "dependencies": [
     {"name":"puppetlabs/stdlib","version_requirement":">= 4.5.0 < 5.0.0"},
@@ -21,7 +21,8 @@
       "operatingsystemrelease": [
         "10.04",
         "12.04",
-        "14.04"
+        "14.04",
+        "16.04"
       ]
     }
   ],
@@ -29,12 +30,8 @@
   "issues_url": "https://github.com/whefter/puppet-syncthing/issues",
   "requirements": [
     {
-      "name": "pe",
-      "version_requirement": "3.x"
-    },
-    {
       "name": "puppet",
-      "version_requirement": "3.x"
+      "version_requirement": ">= 3.7.0 < 5.0.0"
     }
   ],
   "source": "https://github.com/whefter/puppet-syncthing.git",

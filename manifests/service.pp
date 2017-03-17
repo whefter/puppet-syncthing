@@ -1,5 +1,4 @@
 class syncthing::service {
-
   if ! defined(Class['syncthing']) {
     fail('You must include the syncthing base class before using any syncthing defined resources')
   }
@@ -29,12 +28,11 @@ class syncthing::service {
     ],
   }
 
-  service { 'syncthing':
-    ensure  => running,
-    enable  => true,
-    require => [
-      File['/etc/init.d/syncthing']
-    ],
-  }
-
+#  service { 'syncthing':
+#    ensure  => running,
+#    enable  => true,
+#    require => [
+#      File['/etc/init.d/syncthing']
+#    ],
+#  }
 }

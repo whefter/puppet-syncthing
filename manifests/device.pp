@@ -2,6 +2,7 @@ define syncthing::device
 (
   $home_path,
   $id,
+  $instance_name,
 
   $ensure         = 'present',
 
@@ -32,11 +33,12 @@ define syncthing::device
     changes => $changes,
 
     notify  => [
-      Service['syncthing'],
+#      Service["syncthing ${instance_name}"],
+        Exec["restart syncthing instance ${instance_name}"],
     ],
 
     require => [
-      Class['syncthing'],
+      Exec["create syncthing instance ${home_path}"],
     ],
   }
 }

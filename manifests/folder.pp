@@ -1,15 +1,21 @@
 define syncthing::folder
 (
+  # Path to the config.xml file that should be edited. This serves
+  # to identify the instance.
   $home_path,
+  $instance_name, 
+  # Path to the folder
   $path,
+  $label            = $name,
 
   $ensure           = 'present',
 
   $id               = $name,
 
-  $ro               = false,
+  $type             = 'readwrite',
   $rescanIntervalS  = '60',
   $ignorePerms      = false,
+  $autoNormalize    = false,
 
   $options          = {},
 
@@ -36,11 +42,13 @@ define syncthing::folder
     changes => $changes,
 
     notify  => [
+    # Service["syncthing ${instance_name}"],
+      Exec["restart syncthing instance ${instance_name}"],
       Service['syncthing'],
     ],
 
     require => [
-      Class['syncthing'],
+      Exec["create syncthing instance ${home_path}"],
     ],
   }
 }

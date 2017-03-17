@@ -1,11 +1,12 @@
 define syncthing::folder_device
 (
   $home_path,
+  $instance_name,
 
   $folder_id,
   $device_id,
 
-  $ensure           = 'present',
+  $ensure = 'present',
 )
 {
   if ! defined(Class['syncthing']) {
@@ -15,7 +16,7 @@ define syncthing::folder_device
   $instance_config_xml_path = "${home_path}/config.xml"
 
   if $ensure == 'present' {
-    $changes = "set folder[#attribute/id='${folder_id}']/device/#attribute/id ${device_id}"
+    $changes = "set folder[#attribute/id='${folder_id}']/device[#attribute/id='${device_id}']/#attribute/id ${device_id}"
   } else {
     $changes = "rm folder[#attribute/id='${folder_id}']/device[#attribute/id='${device_id}']"
   }
@@ -27,11 +28,12 @@ define syncthing::folder_device
     changes => $changes,
 
     notify  => [
-      Service['syncthing'],
+#      Service["syncthing ${instance_name}"],
+        Exec["restart syncthing instance ${instance_name}"],
     ],
 
     require => [
-      Class['syncthing'],
+      Exec["create syncthing instance ${home_path}"],
     ],
   }
 }
