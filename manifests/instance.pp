@@ -151,7 +151,7 @@ define syncthing::instance
         Exec["restart syncthing instance ${name}"],
       ],
     }
-    if ($options =~ /globalAnnounceServer\d/) {
+    if (has_key($options, 'globalAnnounceServer')) {
         $changes_announce_server = parseyaml( template('syncthing/config_announce_server-changes.yaml.erb') )
         augeas {"add custom globalAnnounceServer":
             incl    => $instance_config_xml_path,
