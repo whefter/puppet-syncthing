@@ -1,6 +1,6 @@
 {
   "name": "whefter-syncthing",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "author": "William Hefter",
   "dependencies": [
     {"name":"puppetlabs/stdlib","version_requirement":">= 4.5.0 < 5.0.0"},

@@ -135,6 +135,10 @@ Hash that will be used to declare `syncthing::folder` resources.
 
 Hash that will be used to declare `syncthing::device` resources.
 
+#####`services_type`
+
+The module attempts to determine the service provider and, based on this, the service file type to install (systemd, initd), on its own, first using the service_provider fact, then based on the OS version. This may or may not work, depending on your setup. This can be used to override the automatically determined value. Pass in "systemd" or "initd".
+
 #####`create_home_path`
 
 Override the default value passed to `syncthing::instance`for `create_home_path`.
