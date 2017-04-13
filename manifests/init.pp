@@ -12,6 +12,8 @@ class syncthing
 
   $create_home_path   = $::syncthing::params::create_home_path,
 
+  $service_type       = $::syncthing::params::service_type,
+
   $daemon_uid         = $::syncthing::params::daemon_uid,
   $daemon_gid         = $::syncthing::params::daemon_gid,
   $daemon_umask       = $::syncthing::params::daemon_umask,

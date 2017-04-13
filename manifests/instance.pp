@@ -67,23 +67,43 @@ define syncthing::instance
       
       $daemon = "${binary_path}/syncthing"
       
-      ::Syncthing::Install_binary["syncthing instance ${name} binary"] -> Exec["create syncthing instance ${home_path}"]
+      if $create_home_path {
+        ::Syncthing::Install_binary["syncthing instance ${name} binary"] -> Exec["create syncthing instance ${home_path}"]
+      }
 
       ::syncthing::instance_service { "${name}":
-        tag => [
+        daemon       => $daemon,
+        home_path    => $home_path,
+        configpath   => $instance_config_path,
+        daemon_uid   => $daemon_uid,
+        daemon_gid   => $daemon_gid,
+        daemon_umask => $daemon_umask,
+        daemon_nice  => $daemon_nice,
+        daemon_debug => $daemon_debug,
+        tag          => [
           'syncthing_binary_instance_service',
         ],
       }
     } else {
       $daemon = $::syncthing::binpath
       
-      Class['::syncthing::install_package'] -> Exec["create syncthing instance ${home_path}"]
-      
-      ::syncthing::instance_service { "${name}":
-        tag => [
-          'syncthing_package_instance_service',
-        ],
+      if $create_home_path {
+        Class['::syncthing::install_package'] -> Exec["create syncthing instance ${home_path}"]
       }
+
+      ::syncthing::instance_service { "${name}":
+        daemon       => $daemon,
+        home_path    => $home_path,
+        configpath   => $instance_config_path,
+        daemon_uid   => $daemon_uid,
+        daemon_gid   => $daemon_gid,
+        daemon_umask => $daemon_umask,
+        daemon_nice  => $daemon_nice,
+        daemon_debug => $daemon_debug,
+        tag          => [
+          'syncthing_binary_instance_service',
+        ],
+      }      
     }
     
     if $create_home_path {
@@ -92,41 +112,31 @@ define syncthing::instance
         path     => $::path,
         creates  => $home_path,
         provider => shell,
-                
+        
         before   => [
           Exec["create syncthing instance ${home_path}"],
-          File[$instance_config_path],
+          ::Syncthing::Instance_service["${name}"],
         ]
-      }      
+      }
+
+      exec { "create syncthing instance ${home_path}":
+        path        => $::path,
+        command     => "${syncthing::binpath} -generate \"${home_path}\"",
+        environment => [ 'STNODEFAULTFOLDER=1', 'HOME=$HOME' ],
+        user        => $daemon_uid,
+        group       => $daemon_gid,
+        creates     => $instance_config_xml_path,
+        provider    => shell,
+
+        before      => [
+          Exec["start syncthing instance ${name}"],
+        ],
+        notify      => [
+          Exec["restart syncthing instance ${name}"],
+        ],
+      }
     }
     
-    file { $instance_config_path:
-      content => template('syncthing/instance.conf.erb'),
-      owner   => $daemon_uid,
-      group   => $daemon_gid,
-      mode    => '0600',
-
-      notify  => [
-#        Service["syncthing ${name}"],
-        Exec["restart syncthing instance ${name}"],
-      ],
-    }
-
-    exec { "create syncthing instance ${home_path}":
-      path        => $::path,
-      command     => "${syncthing::binpath} -generate \"${home_path}\"",
-      environment => [ 'STNODEFAULTFOLDER=1', 'HOME=$HOME' ],
-      user        => $daemon_uid,
-      group       => $daemon_gid,
-      creates     => $instance_config_xml_path,
-      provider    => shell,
-
-      notify      => [
-#        Service["syncthing ${name}"],
-        Exec["restart syncthing instance ${name}"],
-      ],
-    }
-
     if $gui_password_salt {
       $gui_password_hashed = syncthing_bcrypt($gui_password, $gui_password_salt)
     } else {
@@ -141,27 +151,31 @@ define syncthing::instance
       lens    => 'Xml.lns',
       context => "/files${instance_config_xml_path}/configuration",
       changes => $changes,
-
       require => [
         Exec["create syncthing instance ${home_path}"],
       ],
-
+      before  => [
+        Exec["start syncthing instance ${name}"],
+      ],
       notify  => [
-#        Service["syncthing ${name}"],
         Exec["restart syncthing instance ${name}"],
       ],
     }
+
     if (has_key($options, 'globalAnnounceServer')) {
-        $changes_announce_server = parseyaml( template('syncthing/config_announce_server-changes.yaml.erb') )
-        augeas {"add custom globalAnnounceServer":
-            incl    => $instance_config_xml_path,
-            lens    => 'Xml.lns',
-            context => "/files${instance_config_xml_path}/configuration",
-            changes => $changes_announce_server,
-            notify  => Service['syncthing'],
-            require => Augeas["syncthing ${name} basic config"],
-            onlyif  => "match options/globalAnnounceServer size == 1", 
-        }    
+      $changes_announce_server = parseyaml( template('syncthing/config_announce_server-changes.yaml.erb') )
+      augeas {"add custom globalAnnounceServer":
+        incl    => $instance_config_xml_path,
+        lens    => 'Xml.lns',
+        context => "/files${instance_config_xml_path}/configuration",
+        changes => $changes_announce_server,
+        notify  => Exec["restart syncthing instance ${name}"],
+        require => Augeas["syncthing ${name} basic config"],
+        onlyif  => "match options/globalAnnounceServer size == 1",
+        before  => [
+          Exec["start syncthing instance ${name}"],
+        ],
+      }    
     }
     
     each($devices) |$device_name, $device_parameters| {
@@ -170,8 +184,11 @@ define syncthing::instance
         instance_name => $name,
         device_name   => $device_name,
         
+        before        => [
+          Exec["start syncthing instance ${name}"],
+        ],
         require       => [
-          Augeas["syncthing ${name} basic config"],          
+          Augeas["syncthing ${name} basic config"],
         ],
       })
     }
@@ -183,19 +200,21 @@ define syncthing::instance
         id            => $folder_name,
         label         => $folder_name,
         
+        before        => [
+          Exec["start syncthing instance ${name}"],
+        ],
         require       => [
           Augeas["syncthing ${name} basic config"],          
         ],
       })
     }
   } else {
-    file { [$home_path, $instance_config_path]:
-      ensure => absent,
-
-      notify => [
-#        Service["syncthing ${name}"],
-        Exec["stop syncthing instance ${name}"],
+    ::syncthing::instance_service { "${name}":
+      ensure     => absent,
+      daemon_uid => $daemon_uid,
+      tag        => [
+        'syncthing_binary_instance_service',
       ],
-    }
+    }    
   }
 }

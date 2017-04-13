@@ -463,18 +463,43 @@ stop)
   # exit ${STATUS:-0}
   ;;
 status)
-  for CONFFILE in `cd $CONFIG_DIR; ls *.${CONFIG_EXT} 2> /dev/null`; do
-    credentials_from_conffile "${CONFFILE}"
-    PIDFILE=/var/run/$NAME.$BASENAME.pid
-    
-    # Only check the status for instances with pidfiles
-    if [ -f "${PIDFILE}" ]; then
-      pid_from_name "${BASENAME}"
-      echo "${PID}" > ${PIDFILE}
+  if [ -z "$2" ]; then
+    for CONFFILE in `cd $CONFIG_DIR; ls *.${CONFIG_EXT} 2> /dev/null`; do
+      credentials_from_conffile "${CONFFILE}"
+      PIDFILE=/var/run/$NAME.$BASENAME.pid
+
+      # Only check the status for instances with pidfiles
+      if [ -f "${PIDFILE}" ]; then
+        pid_from_name "${BASENAME}"
+        echo "${PID}" > ${PIDFILE}
+      fi
+
       config_debug "STATUS"
       status_of_proc -p $PIDFILE $(basename $DAEMON) "SYNCTHING '${BASENAME}'"
-    fi
-  done
+    done
+  else
+    while shift ; do
+      [ -z "$1" ] && break
+
+      for CONFFILE in `cd $CONFIG_DIR; ls *.${CONFIG_EXT} 2> /dev/null`; do
+        credentials_from_conffile "${CONFFILE}"
+
+        if [ "$1" != "$BASENAME" ]; then
+          continue
+        fi
+
+        PIDFILE=/var/run/$NAME.$BASENAME.pid
+
+        if [ -f "${PIDFILE}" ]; then
+          pid_from_name "${BASENAME}"
+          echo "${PID}" > ${PIDFILE}
+        fi
+
+        config_debug "STATUS"
+        status_of_proc -p $PIDFILE $(basename $DAEMON) "SYNCTHING '${BASENAME}'" || exit 3
+      done
+    done
+  fi
   ;;
 restart|force-reload)
   shift
