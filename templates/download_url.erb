@@ -3,27 +3,55 @@ require 'net/http'
 require 'uri'
 require 'openssl'
 
-uri = URI('https://api.github.com/repos/syncthing/syncthing/releases')
+cacheFile = '/tmp/syncthing-releases'
 
-req = Net::HTTP::Get.new(uri.path)
-req.add_field('User-Agent', 'Ruby')
+if !File.file?(cacheFile) or File.size(cacheFile).to_i == 0 or (Time.new.to_f - File.mtime(cacheFile).to_f) > (4 * 3600)
+  uri = URI('https://api.github.com/repos/syncthing/syncthing/releases')
 
-https = Net::HTTP.new(uri.host, uri.port)
-https.use_ssl = (uri.scheme == 'https')
-https.verify_mode = OpenSSL::SSL::VERIFY_PEER
+  req = Net::HTTP::Get.new(uri.path)
+  req.add_field('User-Agent', 'Ruby')
 
-response = https.start { |context| context.request(req) }
+  https = Net::HTTP.new(uri.host, uri.port)
+  https.use_ssl = (uri.scheme == 'https')
+  https.verify_mode = OpenSSL::SSL::VERIFY_PEER
 
-releases = JSON.parse(response.body)
+  response = https.start { |context| context.request(req) }
 
-if scope.lookupvar('version') == 'latest'
-	release = releases.select { |item| !item['prerelease'] }.first
-else
-	release = releases.select { |item| item['name'] == "v#{scope.lookupvar('version')}" }.first
+  if response.code.to_i == 200
+    File.write(cacheFile, response.body)
+  else
+    File.write(cacheFile, "")
+  end
 end
 
-asset = release['assets'].select { |item|
-	uri = URI.parse(item['browser_download_url'])
-	File.basename(uri.path) =~ /^syncthing-#{scope.lookupvar('kernel')}-#{scope.lookupvar('architecture')}-v/	
-}.first
--%><%= asset['browser_download_url'] %>
+if File.file?(cacheFile) and File.readable?(cacheFile)
+  cache = File.read(cacheFile)
+  
+  if cache.length > 0
+    releases = JSON.parse(cache)
+
+    if releases
+      if scope.lookupvar('version') == 'latest'
+        release = releases.select { |item| !item['prerelease'] }.first
+      else
+        release = releases.select { |item| item['name'] == "v#{scope.lookupvar('version')}" }.first
+      end
+
+      if release
+        asset = release['assets'].select { |item|
+          uri = URI.parse(item['browser_download_url'])
+          File.basename(uri.path) =~ /^syncthing-#{scope.lookupvar('kernel')}-#{scope.lookupvar('architecture')}-v/
+        }.first
+
+        if asset
+          releaseUrl = asset['browser_download_url']
+        end
+      end
+    end
+  end
+end
+
+if releaseUrl
+  -%><%= releaseUrl -%><%
+end
+-%>
