@@ -1,6 +1,8 @@
 #syncthing
 [![Build Status](https://travis-ci.org/whefter/puppet-syncthing.png)](https://travis-ci.org/whefter/puppet-syncthing)
 
+**Compatibility note: the Puppet 3.7.0 and 3.8.0 compatibility has been dropped from metadata.json because the Puppet Forge does not provide a way to specifiy "compatible with Puppet 3.8.0 with future parser enabled". The module is, in fact, compatible with Puppet 3.7.0/3.8.0 with future parser enabled.**
+
 **Version 1.0.0 has a (small) number of incompatible changes, most notably:**
 
 * The `version` parameter has been renamed to `package_version` to reflect that this will only affact the version of the package installed, not of binaries.
