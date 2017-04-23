@@ -4,7 +4,7 @@ bundler_args: --without development system_tests
 before_install: rm Gemfile.lock || true
 script: bundle exec rake test
 rvm:
-  - 1.9.3
+#  - 1.9.3
   - 2.0.0
   - 2.1.0
   - 2.2.0
@@ -20,6 +20,9 @@ env:
   - PUPPET_VERSION="~> 4.5.0" STRICT_VARIABLES=yes
   - PUPPET_VERSION="~> 4.6.0" STRICT_VARIABLES=yes
   - PUPPET_VERSION="~> 4.7.0" STRICT_VARIABLES=yes
+  - PUPPET_VERSION="~> 4.8.0" STRICT_VARIABLES=yes
+  - PUPPET_VERSION="~> 4.9.0" STRICT_VARIABLES=yes
+  - PUPPET_VERSION="~> 4.10.0" STRICT_VARIABLES=yes
 matrix:
   exclude:
   # Ruby 1.9.3
@@ -39,6 +42,12 @@ matrix:
     env: PUPPET_VERSION="~> 4.6.0" STRICT_VARIABLES=yes
   - rvm: 1.9.3
     env: PUPPET_VERSION="~> 4.7.0" STRICT_VARIABLES=yes
+  - rvm: 1.9.3
+    env: PUPPET_VERSION="~> 4.8.0" STRICT_VARIABLES=yes
+  - rvm: 1.9.3
+    env: PUPPET_VERSION="~> 4.9.0" STRICT_VARIABLES=yes
+  - rvm: 1.9.3
+    env: PUPPET_VERSION="~> 4.10.0" STRICT_VARIABLES=yes
     
   # Ruby 2.2.0
   - rvm: 2.2.0
