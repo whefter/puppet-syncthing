@@ -35,8 +35,10 @@ class syncthing
 )
 inherits ::syncthing::params
 {
-  class { '::syncthing::repo': } ->
-  class { '::syncthing::install_package': } ->
+  class { '::syncthing::repo': }
+  ->
+  class { '::syncthing::install_package': }
+  ->
   class { '::syncthing::service': }
 
   create_resources( ::syncthing::instance,  $instances )

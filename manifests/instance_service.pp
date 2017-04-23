@@ -46,12 +46,12 @@ define syncthing::instance_service
       }
 
       exec { "start syncthing instance ${instance_name}":
-        command     => "/usr/sbin/service syncthing start \"${instance_name}\"",
-        provider    => shell,
-        unless      => "/usr/sbin/service syncthing status \"${instance_name}\"",
+        command  => "/usr/sbin/service syncthing start \"${instance_name}\"",
+        provider => shell,
+        unless   => "/usr/sbin/service syncthing status \"${instance_name}\"",
         # Ensure service is always started
         # refreshonly => true,
-        tag         => [
+        tag      => [
           'syncthing_instance_service_start',
         ],
       }
@@ -87,7 +87,7 @@ define syncthing::instance_service
           Exec["reload systemd daemons after instance ${instance_name} modifications"],
         ],
       }
-    
+
       exec { "enable systemd service for ${instance_name}":
         command  => "/bin/systemctl enable syncthing@${daemon_uid}",
         provider => shell,
@@ -101,7 +101,7 @@ define syncthing::instance_service
       }
 
       exec { "reload systemd daemons after instance ${instance_name} modifications":
-        command     => "/bin/systemctl daemon-reload",
+        command     => '/bin/systemctl daemon-reload',
         provider    => shell,
         refreshonly => true,
         notify      => [
@@ -126,15 +126,15 @@ define syncthing::instance_service
       }
 
       exec { "start syncthing instance ${instance_name}":
-        command     => "/usr/sbin/service syncthing@${daemon_uid} start",
-        provider    => shell,
-        unless      => "/bin/systemctl is-active syncthing@${daemon_uid}",
+        command  => "/usr/sbin/service syncthing@${daemon_uid} start",
+        provider => shell,
+        unless   => "/bin/systemctl is-active syncthing@${daemon_uid}",
         # Ensure service is always starting
         # refreshonly => true,
-        tag         => [
+        tag      => [
           'syncthing_instance_service_start',
         ],
-        require     => [
+        require  => [
           File["/etc/systemd/system/syncthing@${daemon_uid}.service"],
           Exec["reload systemd daemons after instance ${instance_name} modifications"],
         ],
@@ -152,7 +152,7 @@ define syncthing::instance_service
           Exec["reload systemd daemons after instance ${instance_name} modifications"],
         ],
       }
-    } elsif ($ensure == 'absent') {      
+    } elsif ($ensure == 'absent') {
       exec { "stop syncthing instance ${instance_name}":
         command  => "/usr/sbin/service syncthing stop syncthing@${daemon_uid}",
         provider => shell,

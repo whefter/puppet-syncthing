@@ -2,7 +2,7 @@ class syncthing::service {
   if ! defined(Class['syncthing']) {
     fail('You must include the syncthing base class before using any syncthing defined resources')
   }
-  
+
   if ($::syncthing::service_type == 'initd') {
     file { '/etc/default/syncthing':
       content => template('syncthing/default.erb'),
@@ -37,7 +37,7 @@ class syncthing::service {
       ensure => absent,
     }
   }
-  
+
 #  if ($::syncthing::service_type == 'systemd') {
 #  } else {
 #  }

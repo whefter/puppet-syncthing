@@ -37,12 +37,12 @@ define syncthing::install_binary
     group  => $group,
     mode   => '0770',
   }
-  
+
   if length($download_url) > 0 {
     exec { "download and unpack syncthing for ${name}":
       cwd     => $path,
       path    => $::path,
-      user    => $daemon_uid,
+      user    => $user,
       command => "wget -O - ${download_url} | tar xzf - --strip-components=1",
       creates => "${path}/syncthing",
       require => [

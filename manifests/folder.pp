@@ -3,7 +3,7 @@ define syncthing::folder
   # Path to the config.xml file that should be edited. This serves
   # to identify the instance.
   $home_path,
-  $instance_name, 
+  $instance_name,
   # Path to the folder
   $path,
   $label            = $name,
@@ -12,10 +12,10 @@ define syncthing::folder
 
   $id               = $name,
 
-  $type             = 'readwrite',
-  $rescanIntervalS  = '60',
-  $ignorePerms      = false,
-  $autoNormalize    = false,
+  $type              = 'readwrite',
+  $rescan_interval_s = '60',
+  $ignore_perms      = false,
+  $auto_normalize    = false,
 
   $options          = {},
 

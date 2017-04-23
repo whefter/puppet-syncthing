@@ -3,9 +3,9 @@
  - 'set folder[#attribute/id="<%= @id %>"]/#attribute/path <%= @path.sub(/(\/*\Z)/, '/') %>'
  - 'set folder[#attribute/id="<%= @id %>"]/#attribute/label <%= @label %>'
  - 'set folder[#attribute/id="<%= @id %>"]/#attribute/type <%= @type %>'
- - 'set folder[#attribute/id="<%= @id %>"]/#attribute/rescanIntervalS <%= @rescanIntervalS %>'
- - 'set folder[#attribute/id="<%= @id %>"]/#attribute/ignorePerms <%= @ignorePerms %>'
- - 'set folder[#attribute/id="<%= @id %>"]/#attribute/autoNormalize <%= @autoNormalize %>'
+ - 'set folder[#attribute/id="<%= @id %>"]/#attribute/rescanIntervalS <%= @rescan_interval_s %>'
+ - 'set folder[#attribute/id="<%= @id %>"]/#attribute/ignorePerms <%= @ignore_perms %>'
+ - 'set folder[#attribute/id="<%= @id %>"]/#attribute/autoNormalize <%= @auto_normalize %>'
 
 <%- @devices.each do |dev_id, dev_ensure| -%>
 <%- if dev_ensure == 'present' -%>
