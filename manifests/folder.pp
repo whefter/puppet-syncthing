@@ -44,7 +44,6 @@ define syncthing::folder
     notify  => [
     # Service["syncthing ${instance_name}"],
       Exec["restart syncthing instance ${instance_name}"],
-      Service['syncthing'],
     ],
 
     require => [
