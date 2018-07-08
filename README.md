@@ -1,3 +1,5 @@
+**This module is not maintained anymore. Ansible and Docker were found to be much, much easier to use than Puppet. As a consequence, I do not have a Puppet infrastructure anymore. Thank you to anyone who contributed and helper during the module's lifetime.**
+
 #syncthing
 [![Build Status](https://travis-ci.org/whefter/puppet-syncthing.png)](https://travis-ci.org/whefter/puppet-syncthing)
 
