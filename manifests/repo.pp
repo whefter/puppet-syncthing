@@ -23,6 +23,7 @@ class syncthing::repo {
               Package[$::syncthing::package_name],
             ],
           }
+          Class['apt::update'] -> Package[$::syncthing::package_name]
       }
       default: {
           fail "Unsupported OS family: ${::osfamily}"
